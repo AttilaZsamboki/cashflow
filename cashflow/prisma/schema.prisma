@@ -1,26 +1,805 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-  // Further reading:
-  // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-  // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Example {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Koltsegelem {
+  id             String @id() @default(cuid())
+  identifier     String
+  identifierText String
+  type           String
+  kategory       String
+  partner        String
 }
 
-// Necessary for Next auth
+model auth_group {
+  id                     Int                      @id @default(autoincrement())
+  name                   String                   @unique @db.VarChar(150)
+  auth_group_permissions auth_group_permissions[]
+  auth_user_groups       auth_user_groups[]
+
+  @@index([name], map: "auth_group_name_a6ea08ec_like")
+}
+
+model auth_group_permissions {
+  id              BigInt          @id @default(autoincrement())
+  group_id        Int
+  permission_id   Int
+  auth_permission auth_permission @relation(fields: [permission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_group_permissio_permission_id_84c5c92e_fk_auth_perm")
+  auth_group      auth_group      @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_group_permissions_group_id_b120cbf9_fk_auth_group_id")
+
+  @@unique([group_id, permission_id], map: "auth_group_permissions_group_id_permission_id_0cd325b0_uniq")
+  @@index([group_id], map: "auth_group_permissions_group_id_b120cbf9")
+  @@index([permission_id], map: "auth_group_permissions_permission_id_84c5c92e")
+}
+
+model auth_permission {
+  id                         Int                          @id @default(autoincrement())
+  name                       String                       @db.VarChar(255)
+  content_type_id            Int
+  codename                   String                       @db.VarChar(100)
+  django_content_type        django_content_type          @relation(fields: [content_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_permission_content_type_id_2f476e4b_fk_django_co")
+  auth_group_permissions     auth_group_permissions[]
+  auth_user_user_permissions auth_user_user_permissions[]
+
+  @@unique([content_type_id, codename], map: "auth_permission_content_type_id_codename_01ab375a_uniq")
+  @@index([content_type_id], map: "auth_permission_content_type_id_2f476e4b")
+}
+
+model auth_user {
+  id                         Int                          @id @default(autoincrement())
+  password                   String                       @db.VarChar(128)
+  last_login                 DateTime?                    @db.Timestamptz(6)
+  is_superuser               Boolean
+  username                   String                       @unique @db.VarChar(150)
+  first_name                 String                       @db.VarChar(150)
+  last_name                  String                       @db.VarChar(150)
+  email                      String                       @db.VarChar(254)
+  is_staff                   Boolean
+  is_active                  Boolean
+  date_joined                DateTime                     @db.Timestamptz(6)
+  auth_user_groups           auth_user_groups[]
+  auth_user_user_permissions auth_user_user_permissions[]
+  django_admin_log           django_admin_log[]
+
+  @@index([username], map: "auth_user_username_6821ab7c_like")
+}
+
+model auth_user_groups {
+  id         BigInt     @id @default(autoincrement())
+  user_id    Int
+  group_id   Int
+  auth_group auth_group @relation(fields: [group_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_user_groups_group_id_97559544_fk_auth_group_id")
+  auth_user  auth_user  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_user_groups_user_id_6a12ed8b_fk_auth_user_id")
+
+  @@unique([user_id, group_id], map: "auth_user_groups_user_id_group_id_94350c0c_uniq")
+  @@index([group_id], map: "auth_user_groups_group_id_97559544")
+  @@index([user_id], map: "auth_user_groups_user_id_6a12ed8b")
+}
+
+model auth_user_user_permissions {
+  id              BigInt          @id @default(autoincrement())
+  user_id         Int
+  permission_id   Int
+  auth_permission auth_permission @relation(fields: [permission_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_user_user_permi_permission_id_1fbb5f2c_fk_auth_perm")
+  auth_user       auth_user       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "auth_user_user_permissions_user_id_a95ead1b_fk_auth_user_id")
+
+  @@unique([user_id, permission_id], map: "auth_user_user_permissions_user_id_permission_id_14a6b632_uniq")
+  @@index([permission_id], map: "auth_user_user_permissions_permission_id_1fbb5f2c")
+  @@index([user_id], map: "auth_user_user_permissions_user_id_a95ead1b")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model dataupload_groups {
+  group    String? @db.VarChar(255)
+  tables   String?
+  user_ids String?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model dataupload_tableoverview {
+  db_table     String  @db.VarChar(255)
+  verbose_name String? @db.VarChar(255)
+  available_at String? @db.VarChar(255)
+  id           Int     @default(autoincrement())
+  email_name   String? @db.VarChar(255)
+  group        String? @db.VarChar(100)
+
+  @@ignore
+}
+
+model dataupload_tabletemplates {
+  id                  BigInt  @id(map: "datastudio_tabletemplates_pkey") @default(autoincrement())
+  table               String  @db.VarChar(30)
+  pkey_col            String? @db.VarChar(30)
+  skiprows            String  @db.VarChar(10)
+  append              String  @db.VarChar(255)
+  source_column_names String?
+}
+
+model dataupload_uploadmodel {
+  id                 BigInt    @id(map: "datastudio_uploadmodel_pkey") @default(autoincrement())
+  table              String    @db.VarChar(50)
+  file               String    @db.VarChar(200)
+  user_id            Int
+  is_new_table       Boolean?
+  status_description String?   @db.VarChar(255)
+  status             String?   @db.VarChar(255)
+  upload_timestamp   DateTime? @db.Timestamp(6)
+  mode               String?
+}
+
+model django_admin_log {
+  id                  Int                  @id @default(autoincrement())
+  action_time         DateTime             @db.Timestamptz(6)
+  object_id           String?
+  object_repr         String               @db.VarChar(200)
+  action_flag         Int                  @db.SmallInt
+  change_message      String
+  content_type_id     Int?
+  user_id             Int
+  django_content_type django_content_type? @relation(fields: [content_type_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "django_admin_log_content_type_id_c4bce8eb_fk_django_co")
+  auth_user           auth_user            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "django_admin_log_user_id_c564eba6_fk_auth_user_id")
+
+  @@index([content_type_id], map: "django_admin_log_content_type_id_c4bce8eb")
+  @@index([user_id], map: "django_admin_log_user_id_c564eba6")
+}
+
+model django_content_type {
+  id               Int                @id @default(autoincrement())
+  app_label        String             @db.VarChar(100)
+  model            String             @db.VarChar(100)
+  auth_permission  auth_permission[]
+  django_admin_log django_admin_log[]
+
+  @@unique([app_label, model], map: "django_content_type_app_label_model_76bd3d3b_uniq")
+}
+
+model django_migrations {
+  id      BigInt   @id @default(autoincrement())
+  app     String   @db.VarChar(255)
+  name    String   @db.VarChar(255)
+  applied DateTime @db.Timestamptz(6)
+}
+
+model django_session {
+  session_key  String   @id @db.VarChar(40)
+  session_data String
+  expire_date  DateTime @db.Timestamptz(6)
+
+  @@index([expire_date], map: "django_session_expire_date_a5c62663")
+  @@index([session_key], map: "django_session_session_key_c0390e0f_like")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model feed {
+  url       String? @unique(map: "url")
+  table     String?
+  user_id   Int?
+  frequency String?
+  id        Int     @default(autoincrement())
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model fol_bev_telek {
+  Azonosito                  String?
+  Date                       DateTime? @db.Date
+  Teljesites_datuma          DateTime? @db.Date
+  Ar                         Float?
+  Penznem                    String?
+  Atvaltasi_rata             BigInt?
+  AFA_                       BigInt?
+  Osszesen_HUF               Float?
+  Netto_ossz                 Float?
+  AFA_ertek                  BigInt?
+  Tipus                      String?
+  Penztarca                  String?
+  Kategoria                  String?
+  Eredmeny_kategoria         String?
+  Tranzakcio_uzenet          String?
+  Tranzakcio_partner_fiok    String?
+  Tranzakcio_beszallito_neve String?
+  Tranzakcio_tipusa          String?
+  id                         Int       @default(autoincrement())
+
+  @@map("fol_bevételek")
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model fol_gls_elsz_mol_s {
+  Csomagszam              BigInt?
+  Ugyfel_hivatkozas_      String?
+  Utanvet_hivatkozas_     String?
+  Utanvet_osszege         Float?
+  Felvetel_datuma_        DateTime? @db.Timestamp(6)
+  Kiszallitas_napja       DateTime? @db.Timestamp(6)
+  Celorszag_              String?
+  Suly                    Float?
+  Kapcsolt_szolgaltatasok String?
+  Futar_koltseg           Float?
+  Cimzett_neve_           String?
+  Kiszallitasi_cim_       String?
+  Atvevo_neve_            String?
+  logisztika              Float?
+  id                      Int       @default(autoincrement())
+
+  @@map("fol_gls_elszámolás")
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model fol_k_lts_gek {
+  azonosito                  String
+  honap                      String?
+  date                       DateTime? @db.Date
+  partner                    String?
+  koltsegelem                String?
+  ar                         Float?
+  penznem                    String?
+  atvaltasi_rata             BigInt?
+  afa_                       BigInt?
+  osszesen_huf               Float?
+  netto_ossz                 Float?
+  afa_ertek                  Float?
+  tipus                      String?
+  penztarca                  String?
+  koltseg_osztaly            String?
+  iktatasi_allapot           String?
+  szamla_sorszama            Float?
+  tranzakcio_uzenet          String?
+  tranzakcio_partner_fiok    String?
+  tranzakcio_beszallito_neve String?
+  tranzakcio_tipusa          String?
+  teljesites_datuma          DateTime? @db.Date
+  megjegyzesek               String?
+  tranzakcio_belso_azonosito String?
+  tranzakcio_kulso_azonosito String?
+  megjegyzesek2              String?
+  id                         Int       @default(autoincrement())
+
+  @@map("fol_költségek")
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model fol_learn_id {
+  Course_id BigInt?
+  Sku       String?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model fol_orders {
+  Row_Type                      String?
+  Order_Id                      String?
+  Sku                           String?
+  Product_Name                  String?
+  Default_Supplier_Unit_Price   String?
+  Default_Supplier_Currency     String?
+  Quantity                      Float?
+  Unit_Price                    Float?    @default(0)
+  Discount                      Float?
+  Tax                           Float?
+  Subtotal                      Float?
+  Cogs                          Float?
+  Margin                        Float?
+  Margin_                       Float?
+  Item_Note                     String?
+  Weight                        Float?
+  Webshop_Id                    String?
+  Order_Total                   Float?
+  Currency                      String?
+  Source                        String?
+  Source_Name                   String?
+  Order_Status                  String?
+  Order_Date                    DateTime? @db.Date
+  Memo                          String?
+  Billing_Email                 String?
+  Billing_Address_1             String?
+  Billing_Address_2             String?
+  Billing_Country               String?
+  Billing_City                  String?
+  Billing_Zip_Code              String?
+  Billing_Last_Name             String?
+  Billing_First_Name            String?
+  Billing_Tax_Number            String?
+  Billing_Company               String?
+  Manual_Invoicing              Boolean?
+  Manual_Proforma               Boolean?
+  Shipping_Email                String?
+  Shipping_Address_1            String?
+  Shipping_Address_2            String?
+  Shipping_Country              String?
+  Shipping_City                 String?
+  Shipping_Zip_Code             String?
+  Shipping_Last_Name            String?
+  Shipping_First_Name           String?
+  Shipping_Company              String?
+  Delivery_Note                 String?
+  Shipping_Method               String?
+  Payment_Method                String?
+  Discount_Value                Float?
+  Exchange_Rate                 BigInt?
+  Payment_Status                String?
+  Warehouse                     String?
+  Delivery_Date                 DateTime? @db.Date
+  Proforma_Invoice_Id           String?
+  Proforma_Invoice_Id_2         String?
+  Invoice_Id                    String?
+  Reverse_Invoice_Id            String?
+  Prepayment_Reverse_Invoice_Id String?
+  Prepayment_Invoice_Id_2       String?
+  Tags                          String?
+  Customer_classes              String?
+  Created_by                    String?
+  Assigned_User                 String?
+  Default_Customer_Class        String?
+  Completed_Date                DateTime? @db.Date
+  id                            Int       @default(autoincrement())
+  Paid_At                       DateTime? @db.Timestamp(6)
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model fol_product_suppliers {
+  Product_Name                          String?
+  SKU                                   String?
+  Supplier___1___Name                   String?
+  Supplier___1___Net_Price              Float?
+  Supplier___1___VAT                    String?
+  Supplier___1___VAT_                   Float?
+  Supplier___1___Currency               String?
+  Supplier___1___Barcode                Float?
+  Supplier___1___Reference              String?
+  Supplier___1___Product_Name           String?
+  Supplier___1___Minimum_Order_Quantity Float?
+  Supplier___1___Unit_of_Measurement    Float?
+  Supplier___1___Package_Size           Float?
+  Supplier___1___Lead_Time              Float?
+  Supplier___1___Days_of_Stock          Float?
+  Supplier___1___Safety_Stock           Float?
+  Supplier___1___Default                Float?
+  Supplier___1___Note                   Float?
+  Supplier___2___Name                   String?
+  Supplier___2___Net_Price              Float?
+  Supplier___2___VAT                    String?
+  Supplier___2___VAT_                   Float?
+  Supplier___2___Currency               String?
+  Supplier___2___Barcode                Float?
+  Supplier___2___Reference              String?
+  Supplier___2___Product_Name           String?
+  Supplier___2___Minimum_Order_Quantity Float?
+  Supplier___2___Unit_of_Measurement    Float?
+  Supplier___2___Package_Size           Float?
+  Supplier___2___Lead_Time              Float?
+  Supplier___2___Days_of_Stock          Float?
+  Supplier___2___Safety_Stock           Float?
+  Supplier___2___Default                Float?
+  Supplier___2___Note                   Float?
+  id                                    Int     @default(autoincrement())
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model fol_stock_aging {
+  index                     BigInt?
+  sku                       String?
+  shipment                  BigInt?
+  shipment_now              BigInt?
+  current_stock             BigInt?
+  date                      DateTime? @db.Timestamp(6)
+  age                       BigInt?
+  weighted_archimetric_mean Float?
+  shipment_supplier_name    String?
+
+  @@index([index], map: "ix_fol_stock_aging_index")
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model fol_stock_report {
+  id                    BigInt?
+  name                  String?
+  sku                   String?
+  on_stock              BigInt?
+  layers_warehouse      String?
+  on_stock_layer        Float?
+  net_price             Float?
+  landed_cost_layer     Float?
+  inventory_value_layer Float?
+  date                  DateTime? @db.Date
+  sales                 BigInt?
+  timestamp             DateTime? @db.Date
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model fol_stock_transaction_report {
+  Operation_identifier   String?
+  Product                String?
+  Warehouse              String?
+  Operation_status       String?
+  Operation_item_status  String?
+  Operation_direction    String?
+  Quantity               BigInt?
+  Done_quantity          BigInt?
+  Before_quantity        Float?
+  After_quantity         Float?
+  Reason                 String?
+  Item_notes             String? @db.VarChar(255)
+  Related_identifier     String?
+  Assigned_user          String?
+  Created                String?
+  Finished               String?
+  Cancelled              Float?
+  Cancelled_by           Float?
+  Shipment_supplier_name String?
+  Is_dynamic             String?
+
+  @@ignore
+}
+
+model fol_sz_ml_k {
+  Szamla_belso_azonosito String   @id(map: "számlák_pk") @unique(map: "számlák_számla belső azonosító_uindex")
+  Szamla_azonosito       String?
+  Date                   String?
+  Hatarido               String?
+  Fizetes_datuma         String?
+  Teljesites_datuma      String?
+  Tipus                  String?
+  Fizetesi_allapot       String?
+  Iktatasi_Allapot       String?
+  Expired                Boolean?
+  Partner                String?
+  Szallitmanyok          String?
+  Koltseg                Float?
+  Penznem                String?
+  Atvaltasi_rata         Float?
+  Osszesen_HUF           Float?
+  PDF                    String?
+  Fizetesi_mod           String?
+  Megjegyzes             String?
+  id                     Int      @default(autoincrement())
+
+  @@map("fol_számlák")
+}
+
+model fol_unas {
+  cikkszam                            String?
+  termek_nev                          String?
+  netto_ar                            Float?
+  brutto_ar                           Float?
+  Parameter_Minosegtext               String?
+  Parameter_Kiszerelesenum            String?
+  Parameter_Szintext                  String?
+  Parameter_1_m2_feluletheztext       String?
+  Parameter_Csaladtext                String?
+  Parameter_Kategoriatext             String?
+  Parameter_Teli_hangulat_mintatext   String?
+  Parameter_Szelessegtext             String?
+  Parameter_Hossztext                 String?
+  Parameter_Merettext                 String?
+  Parameter_Ablakfolia_tipustext      String?
+  Parameter_Belathatosagtext          String?
+  Parameter_Felhelyezestext           String?
+  Parameter_Felulettext               String?
+  Parameter_Hovisszaverestext         String?
+  Parameter_Koporetegtext             String?
+  Parameter_Ontapados_padloPadlotext  String?
+  Parameter_Padlo_tipusaPadlotext     String?
+  Parameter_UV_vedelemtext            String?
+  Parameter_Vastagsagtext             String?
+  Parameter_Csomag_kiszerelesenum     String?
+  Parameter_Video_segitsegVideokhtml  String?
+  Parameter_VIP_artext                Float?
+  Parameter_m2_doboztext              String? @map("Parameter_m2/doboztext")
+  Parameter_m2_tekercstext            String? @map("Parameter_m2/tekercstext")
+  Parameter_m2_csomagtext             String? @map("Parameter_m2/csomagtext")
+  Parameter_Felhelyezes_nehezsegetext Float?
+  Parameter_Eltavolithatotext         String?
+  Parameter_Illesztestext             String?
+  Parameter_Tisztitasatext            String?
+  Parameter_ELOFIZETEStext            String?
+  Parameter_Konzultacioenum           String?
+  Parameter_brandtext                 String?
+  Parameter_eantext                   String?
+  Parameter_mpntext                   String?
+  Parameter_Lepesmelysegtext          String?
+  Parameter_Lehajlo_peremtext         String?
+  Parameter_Aremelestext              String?
+  id                                  Int     @id(map: "unas_pk") @unique(map: "unas_id_uindex") @default(autoincrement())
+  Category                            String?
+}
+
+model kh {
+  Konyveles_datuma                                    DateTime? @db.Timestamp(6)
+  Tranzakcio_azonosito_                               String?
+  Tipus                                               String?
+  Konyvelesi_szamla                                   String?
+  Konyvelesi_szamla_elnevezese                        String?
+  Partner_szamla                                      String?
+  Partner_elnevezese                                  String?
+  Osszeg                                              BigInt?
+  Osszeg_devizaneme                                   String?
+  Kozlemeny                                           String?
+  Tranzakciot_indito_tenyleges_fizeto_fel_neve_       Float?
+  A_tenyleges_fizeto_azonositojanak_tipusa_           Float?
+  Tranzakciot_indito_tenyleges_fizeto_fel_azonositoja Float?
+  Tenyleges_kedvezmenyezett_neve_                     Float?
+  Tenyleges_kedvezmenyezett_azonositoja_              Float?
+  Tenyleges_kedvezmenyezett_azonositojanak_tipusa     Float?
+  Partnerek_kozti_egyedi_azonosito_                   String?
+  Szervezetazonosito                                  Float?
+  Atutalas_jogcime_                                   Float?
+  Atutalas_jogcim_kategoriaja_                        Float?
+  Partner_masodlagos_szamlaazonosito                  Float?
+  id                                                  Int       @id(map: "id") @default(autoincrement())
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model pro_bev_telek {
+  Azonosito                  String?
+  Date                       DateTime? @db.Date
+  Teljesites_datuma          DateTime? @db.Date
+  Ar                         Float?
+  Penznem                    String?
+  Atvaltasi_rata             Float?
+  AFA_                       BigInt?
+  Osszesen_HUF               Float?
+  Netto_ossz                 Float?
+  AFA_ertek                  BigInt?
+  Tipus                      String?
+  Penztarca                  String?
+  Kategoria                  String?
+  Eredmeny_kategoria         String?
+  Tranzakcio_uzenet          String?
+  Tranzakcio_partner_fiok    String?
+  Tranzakcio_beszallito_neve String?
+  Tranzakcio_tipusa          String?
+
+  @@map("pro_bevételek")
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model pro_k_lts_gek {
+  Azonosito                  String?
+  Honap                      String?
+  date                       DateTime? @db.Date
+  Partner                    String?
+  Koltsegelem                String?
+  Ar                         Float?
+  Penznem                    String?
+  Atvaltasi_rata             Float?
+  AFA_                       BigInt?
+  Osszesen_HUF               Float?
+  Netto_ossz                 Float?
+  AFA_ertek                  BigInt?
+  Tipus                      String?
+  Penztarca                  String?
+  Koltseg_osztaly            String?
+  Iktatasi_allapot           String?
+  Szamla_sorszama            String?
+  Tranzakcio_uzenet          String?
+  Tranzakcio_partner_fiok    String?
+  Tranzakcio_beszallito_neve String?
+  Tranzakcio_tipusa          String?
+  Teljesites_datuma          DateTime? @db.Date
+  Megjegyzesek               String?
+  Tranzakcio_belso_azonosito String?
+  Tranzakcio_kulso_azonosito String?
+  Megjegyzesek1              String?
+  id                         Int       @default(autoincrement())
+
+  @@map("pro_költségek")
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model pro_orders {
+  Row_Type                      String?
+  Order_Id                      String?
+  Sku                           String?
+  Product_Name                  String?
+  Default_Supplier_Unit_Price   String?
+  Default_Supplier_Currency     String?
+  Quantity                      Float?
+  Unit_Price                    Float?
+  Discount                      Float?
+  Tax                           Float?
+  Subtotal                      Float?
+  Cogs                          Float?
+  Margin                        Float?
+  Margin_                       Float?
+  Item_Note                     String?
+  Weight                        Float?
+  Webshop_Id                    String?
+  Order_Total                   Float?
+  Currency                      String?
+  Source                        String?
+  Source_Name                   String?
+  Order_Status                  String?
+  Order_Date                    DateTime? @db.Date
+  Memo                          String?
+  Billing_Email                 String?
+  Billing_Address_1             String?
+  Billing_Address_2             String?
+  Billing_Country               String?
+  Billing_City                  String?
+  Billing_Zip_Code              BigInt?
+  Billing_Last_Name             String?
+  Billing_First_Name            String?
+  Billing_Tax_Number            String?
+  Billing_Company               String?
+  Manual_Invoicing              Boolean?
+  Manual_Proforma               Boolean?
+  Shipping_Email                String?
+  Shipping_Address_1            String?
+  Shipping_Address_2            String?
+  Shipping_Country              String?
+  Shipping_City                 String?
+  Shipping_Zip_Code             String?
+  Shipping_Last_Name            String?
+  Shipping_First_Name           String?
+  Shipping_Company              String?
+  Delivery_Note                 String?
+  Shipping_Method               String?
+  Payment_Method                String?
+  Discount_Value                Float?
+  Exchange_Rate                 BigInt?
+  Payment_Status                String?
+  Warehouse                     String?
+  Delivery_Date                 Float?
+  Proforma_Invoice_Id           String?
+  Proforma_Invoice_Id_2         Float?
+  Invoice_Id                    String?
+  Reverse_Invoice_Id            String?
+  Prepayment_Reverse_Invoice_Id String?
+  Prepayment_Invoice_Id_2       String?
+  Tags                          String?
+  Customer_classes              String?
+  Created_by                    String?
+  Assigned_User                 String?
+  Default_Customer_Class        String?
+  Completed_Date                DateTime? @db.Date
+  Cancelled_At                  DateTime? @db.Timestamp(6)
+  Cancelled_By                  String?
+  Paid_At                       DateTime? @db.Timestamp(6)
+  Cancel_Reason                 String?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model pro_product_suppliers {
+  Product_Name                          String?
+  SKU                                   String?
+  Supplier___1___Name                   String?
+  Supplier___1___Net_Price              Float?
+  Supplier___1___VAT                    String?
+  Supplier___1___VAT_                   Float?
+  Supplier___1___Currency               String?
+  Supplier___1___Barcode                Float?
+  Supplier___1___Reference              String?
+  Supplier___1___Product_Name           String?
+  Supplier___1___Minimum_Order_Quantity Float?
+  Supplier___1___Unit_of_Measurement    Float?
+  Supplier___1___Package_Size           Float?
+  Supplier___1___Lead_Time              Float?
+  Supplier___1___Days_of_Stock          Float?
+  Supplier___1___Safety_Stock           Float?
+  Supplier___1___Default                Float?
+  Supplier___1___Note                   Float?
+  Supplier___2___Name                   String?
+  Supplier___2___Net_Price              Float?
+  Supplier___2___VAT                    String?
+  Supplier___2___VAT_                   Float?
+  Supplier___2___Currency               String?
+  Supplier___2___Barcode                Float?
+  Supplier___2___Reference              String?
+  Supplier___2___Product_Name           String?
+  Supplier___2___Minimum_Order_Quantity Float?
+  Supplier___2___Unit_of_Measurement    Float?
+  Supplier___2___Package_Size           Float?
+  Supplier___2___Lead_Time              Float?
+  Supplier___2___Days_of_Stock          Float?
+  Supplier___2___Safety_Stock           Float?
+  Supplier___2___Default                Float?
+  Supplier___2___Note                   Float?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model pro_products {
+  ID                                                 BigInt?
+  Name                                               String?
+  SKU                                                String?
+  Minimum_Stock_Quantity                             Float?
+  Optimal_Stock_Quantity                             Float?
+  Category                                           String?
+  Product_Class                                      Float?
+  Tags                                               String?
+  Warehouse___Fo_raktar___Minimum_Stock_Quantity     Float?
+  Warehouse___Fo_raktar___Optimal_Stock_Quantity     Float?
+  Warehouse___Selejt_raktar___Minimum_Stock_Quantity Float?
+  Warehouse___Selejt_raktar___Optimal_Stock_Quantity Float?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model pro_stock_report {
+  ID                    BigInt?
+  Name                  String?
+  SKU                   String?
+  On_Stock              BigInt?
+  Layers_Warehouse      String?
+  On_Stock_Layer        Float?
+  Net_Price             Float?
+  Landed_Cost_Layer     Float?
+  Inventory_Value_Layer Float?
+  Date                  DateTime? @db.Date
+  Sales                 BigInt?
+  timestamp             DateTime? @db.Date
+  Available             Int?
+  Available_Layer       Int?
+  On_Stock_Days         Int?
+  Sales_Velocity        Float?
+  Stockturn_in_Days     Float?
+  Stockturn             Float?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model pro_sz_ml_k {
+  Szamla_belso_azonosito String?
+  Szamla_azonosito       String?
+  Date                   DateTime? @db.Date
+  Hatarido               String?
+  Fizetes_datuma         String?
+  Teljesites_datuma      String?
+  Tipus                  String?
+  Fizetesi_allapot       String?
+  Iktatasi_Allapot       String?
+  Expired                Boolean?
+  Partner                String?
+  Szallitmanyok          String?
+  Koltseg                Float?
+  Penznem                String?
+  Atvaltasi_rata         Float?
+  Osszesen_HUF           Float?
+  PDF                    String?
+  Fizetesi_mod           String?
+  Megjegyzes             String?
+
+  @@map("pro_számlák")
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model starting_closing_cf {
+  months          String?
+  starting_values BigInt?
+  closing_values  BigInt?
+
+  @@ignore
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String
