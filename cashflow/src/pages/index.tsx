@@ -9,10 +9,13 @@ import {
   Title,
   Tooltip,
   Legend,
+  ArcElement,
 } from "chart.js";
 import { faker } from "@faker-js/faker";
 import LineChart from "../components/LineChart";
 import StatCard from "../components/StatCard";
+import PieChart from "../components/PieChart";
+import DatePicker from "../components/DatePicker";
 
 ChartJS.register(
   CategoryScale,
@@ -21,7 +24,8 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  ArcElement
 );
 
 const labels = ["January", "February", "March", "April", "May", "June", "July"];
@@ -62,10 +66,12 @@ const Home: NextPage = () => {
     <div>
       <Navbar currentPage="Főoldal" />
       <StatCard data={200} text="Current users" />
-      <div className="ml-10 grid columns-2 auto-cols-max grid-cols-3 grid-rows-1">
+      <div className="ml-10 grid columns-2 auto-cols-max grid-cols-4 grid-rows-2">
         <LineChart options={options} data={data} type="Bevételek" />
         <LineChart options={options} data={data} type="Költségek" />
         <LineChart options={options} data={data} type="Cashflow" />
+        <PieChart options={options} data={data} type="Költség Kategóriák" />
+        <DatePicker />
       </div>
     </div>
   );

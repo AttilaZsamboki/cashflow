@@ -33,7 +33,10 @@ export default function Navbar({ currentPage }: { currentPage: string }) {
     },
   ];
   return (
-    <Disclosure as="nav" className="bg-gray-800 shadow-lg shadow-gray-800">
+    <Disclosure
+      as="nav"
+      className="border-b-2 border-b-gray-700 bg-gray-800 shadow-lg shadow-gray-800"
+    >
       {({ open }) => (
         <>
           <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
