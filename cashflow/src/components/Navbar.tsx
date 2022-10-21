@@ -35,7 +35,7 @@ export default function Navbar({ currentPage }: { currentPage: string }) {
   return (
     <Disclosure
       as="nav"
-      className="border-b-2 border-b-gray-700 bg-gray-800 py-4 shadow-lg shadow-gray-800"
+      className="border-b-2 border-b-gray-700 bg-gray-800 py-4 shadow-md shadow-gray-800"
     >
       {({ open }) => (
         <>
@@ -55,12 +55,12 @@ export default function Navbar({ currentPage }: { currentPage: string }) {
               <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
                 <div className="flex flex-shrink-0 items-center">
                   <img
-                    className="block h-11 w-auto lg:hidden"
+                    className="block h-14 w-auto lg:hidden"
                     src="/money-flow.png"
                     alt="Cashflow"
                   />
                   <img
-                    className="hidden h-11 w-auto lg:block"
+                    className="hidden h-14 w-auto lg:block"
                     src="/money-flow.png"
                     alt="Cashflow"
                   />
@@ -74,7 +74,7 @@ export default function Navbar({ currentPage }: { currentPage: string }) {
                             item.current
                               ? "bg-gray-900 text-white"
                               : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                            "rounded-md px-3 py-2 text-sm font-medium"
+                            "rounded-md px-3 py-2 text-lg font-medium"
                           )}
                           aria-current={item.current ? "page" : undefined}
                         >
@@ -91,7 +91,7 @@ export default function Navbar({ currentPage }: { currentPage: string }) {
                   className="rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                 >
                   <span className="sr-only">View notifications</span>
-                  <BellIcon className="h-6 w-6" aria-hidden="true" />
+                  <BellIcon className="h-7 w-7" aria-hidden="true" />
                 </button>
 
                 {/* Profile dropdown */}
@@ -100,7 +100,7 @@ export default function Navbar({ currentPage }: { currentPage: string }) {
                     <Menu.Button className="flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                       <span className="sr-only">Open user menu</span>
                       <img
-                        className="h-8 w-8 rounded-full"
+                        className="h-11 w-11 rounded-full"
                         src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
                         alt=""
                       />

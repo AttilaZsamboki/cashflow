@@ -12,7 +12,7 @@ export default function DatePicker() {
     <RangeCalendar
       value={value}
       onChange={setValue}
-      className="h-80 rounded-lg bg-white opacity-90 shadow-lg shadow-gray-700"
+      className="h-96 rounded-lg bg-white opacity-90 shadow-lg shadow-gray-700"
       style={{ marginTop: -160 }}
       locale="hu"
     />
