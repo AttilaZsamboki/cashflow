@@ -29,7 +29,7 @@ export default function StatCard({
     >
       <div className="-mb-2 sm:flex sm:space-x-4">
         {data.map((stat) => (
-          <Card data={stat.ammount} text={stat.text} />
+          <Card data={stat.ammount} key={stat.text} text={stat.text} />
         ))}
       </div>
     </div>

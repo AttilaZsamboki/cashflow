@@ -22,7 +22,7 @@ export default function LinkCards({
       style={{ marginTop: -170, height: 390 }}
     >
       {elements.map((element) => (
-        <Cards href={element.href} text={element.text} />
+        <Cards href={element.href} key={element.text} text={element.text} />
       ))}
     </div>
   );

@@ -55,6 +55,7 @@ export default function RadioListButton({
       <ul>
         {elements.map((element) => (
           <RadioButton
+            key={element.valletName}
             text={element.valletName}
             value={element.balance}
             setTotalBalance={setTotalBalance}
