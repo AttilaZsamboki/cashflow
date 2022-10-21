@@ -16,6 +16,7 @@ import LineChart from "../components/LineChart";
 import StatCard from "../components/StatCard";
 import PieChart from "../components/PieChart";
 import DatePicker from "../components/DatePicker";
+import LinkCards from "../components/LinkCards";
 
 ChartJS.register(
   CategoryScale,
@@ -38,7 +39,6 @@ export const options = {
     },
     title: {
       display: true,
-      text: "Chart.js Line Chart",
     },
   },
 };
@@ -72,6 +72,16 @@ const Home: NextPage = () => {
         <LineChart options={options} data={data} type="Cashflow" />
         <PieChart options={options} data={data} type="Költség Kategóriák" />
         <DatePicker />
+        <DatePicker />
+        <div
+          className="grid-col-1 grid grid-flow-row-dense"
+          style={{ marginTop: -180, height: 350 }}
+        >
+          <LinkCards href="datas" text="Adatok" />
+          <LinkCards href="vallets" text="Pénztrácák" />
+          <LinkCards href="transactions" text="Tranzakciók" />
+          <LinkCards href="profile" text="Profil" />
+        </div>
       </div>
     </div>
   );

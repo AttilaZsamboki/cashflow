@@ -35,7 +35,7 @@ export default function Navbar({ currentPage }: { currentPage: string }) {
   return (
     <Disclosure
       as="nav"
-      className="border-b-2 border-b-gray-700 bg-gray-800 shadow-lg shadow-gray-800"
+      className="border-b-2 border-b-gray-700 bg-gray-800 py-4 shadow-lg shadow-gray-800"
     >
       {({ open }) => (
         <>

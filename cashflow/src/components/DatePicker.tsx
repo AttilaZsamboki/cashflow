@@ -13,7 +13,7 @@ export default function DatePicker() {
       value={value}
       onChange={setValue}
       className="h-80 rounded-lg bg-white opacity-90 shadow-lg shadow-gray-700"
-      style={{ marginTop: -180 }}
+      style={{ marginTop: -160 }}
       locale="hu"
     />
   );
