@@ -62,7 +62,7 @@ const Home: NextPage = () => {
         <DatePicker />
         <RadioListButton
           elements={[
-            { valletName: "AppaCash", balance: 300 },
+            { valletName: "AppaCash", balance: 10000 },
             { valletName: "AnyaCash", balance: 200 },
             { valletName: "K&H", balance: 500 },
             { valletName: "AttiCash", balance: 100 },
