@@ -71,6 +71,9 @@ const Home: NextPage = () => {
   const all = trpc.expenses.getAllIncomeExpense.useQuery();
   const [animationParent] = useAutoAnimate<HTMLDivElement>();
   const [selectedVallets, setSelectedVallets] = React.useState([""]);
+  const [startingDate, setStartingDate] = React.useState<Date>();
+  const [closingDate, setClosingDate] = React.useState<Date>();
+  console.log(closingDate, startingDate);
   React.useEffect(() => {
     if (vallets.data) {
       setSelectedVallets(vallets.data?.map((vallet) => vallet.name));
@@ -93,7 +96,10 @@ const Home: NextPage = () => {
         <LineChart options={options} type="Költségek" />
         <LineChart options={options} type="Cashflow" />
         <PieChart options={options} type="Költség Kategóriák" />
-        <DatePicker />
+        <DatePicker
+          setStartingDate={setStartingDate}
+          setClosingDate={setClosingDate}
+        />
         <RadioListButton
           elements={
             !vallets.data || !all.data

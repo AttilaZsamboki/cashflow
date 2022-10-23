@@ -66,6 +66,7 @@ export default function RadioListButton({
   selectedVallets: string[];
   setSelectedVallets: React.Dispatch<string[]>;
 }) {
+  const [totalBalance, setTotalBalance] = React.useState<number>();
   if (elements === "Loading...") {
     return (
       <div className="m-4 -mt-40 -ml-40 mr-8 h-96 w-80 rounded-lg border-2 border-gray-200 bg-white text-center text-sm font-medium text-gray-900 opacity-95 shadow-lg shadow-gray-700">
@@ -73,9 +74,11 @@ export default function RadioListButton({
       </div>
     );
   }
-  const [totalBalance, setTotalBalance] = React.useState<number>(
-    elements.map((element) => element.balance).reduce((a, b) => a + b, 0)
-  );
+  React.useEffect(() => {
+    setTotalBalance(
+      elements.map((element) => element.balance).reduce((a, b) => a + b, 0)
+    );
+  }, [elements]);
   return (
     <div className="m-4 -mt-40 -ml-40 mr-8 h-96 w-80 rounded-lg border-2 border-gray-200 bg-white text-sm font-medium text-gray-900 opacity-95 shadow-lg shadow-gray-700">
       <h3 className="m-3 font-bold text-gray-700">Pénztárcák</h3>
