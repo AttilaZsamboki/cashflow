@@ -1,6 +1,8 @@
 import React from "react";
 import { Pie } from "react-chartjs-2";
 import { faker } from "@faker-js/faker";
+import { _DeepPartialObject } from "chart.js/types/utils";
+import { CoreChartOptions } from "chart.js";
 
 const labels = ["January", "February", "March", "April", "May", "June", "July"];
 
@@ -8,7 +10,7 @@ export default function PieChart({
   options,
   type,
 }: {
-  options: any;
+  options: _DeepPartialObject<CoreChartOptions<"pie">>
   type: string;
 }) {
   const data = {

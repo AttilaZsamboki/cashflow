@@ -1,19 +1,75 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Koltsegelem {
-  id             String @id() @default(cuid())
-  identifier     String
-  identifierText String
-  type           String
-  kategory       String
-  partner        String
+generator client {
+  provider = "prisma-client-js"
+}
+
+model expenses {
+  Konyveles_datuma                                    DateTime? @db.Timestamp(6)
+  Tranzakcio_azonosito_                               String?
+  Tipus                                               String?
+  Konyvelesi_szamla                                   String?
+  Konyvelesi_szamla_elnevezese                        String?
+  Partner_szamla                                      String?
+  Partner_elnevezese                                  String?
+  Osszeg                                              BigInt?
+  Osszeg_devizaneme                                   String?
+  Kozlemeny                                           String?
+  Tranzakciot_indito_tenyleges_fizeto_fel_neve_       Float?
+  A_tenyleges_fizeto_azonositojanak_tipusa_           Float?
+  Tranzakciot_indito_tenyleges_fizeto_fel_azonositoja Float?
+  Tenyleges_kedvezmenyezett_neve_                     Float?
+  Tenyleges_kedvezmenyezett_azonositoja_              Float?
+  Tenyleges_kedvezmenyezett_azonositojanak_tipusa     Float?
+  Partnerek_kozti_egyedi_azonosito_                   String?
+  Szervezetazonosito                                  Float?
+  Atutalas_jogcime_                                   Float?
+  Atutalas_jogcim_kategoriaja_                        Float?
+  Partner_masodlagos_szamlaazonosito                  Float?
+  id                                                  Int       @id() @unique @default(autoincrement())
+  vallet                                              String?   @default("K&H")
+  kategory                                            String?
+  name                                                String?
+  type                                                String?
+  minta                                               String?
+
+  @@map("expenses")
+}
+
+model Koltsegelemek {
+  name                   String                   @id
+  type                   String
+  kategory               String
+  partnerId              String
+  partner                Partnerek                @relation(fields: [partnerId], references: [id])
+  KoltsegelemKapcsolatok KoltsegelemKapcsolatok[]
+}
+
+model Partnerek {
+  id                     String                   @id
+  name                   String
+  KoltsegelemKapcsolatok KoltsegelemKapcsolatok[]
+  Koltsegtetelek         Koltsegelemek[]
+}
+
+model KoltsegelemKapcsolatok {
+  id            String        @id @default(cuid())
+  minta         String
+  koltsegelemId String
+  partnerekId   String
+  koltsegelem   Koltsegelemek @relation(fields: [koltsegelemId], references: [name])
+  partner       Partnerek     @relation(fields: [partnerekId], references: [id])
+}
+
+model Penztarcak {
+  id        String  @id @default(cuid())
+  account   Account @relation(fields: [accountId], references: [id])
+  accountId String
+  nyito     Int
+  name      String
 }
 
 model auth_group {
@@ -524,31 +580,6 @@ model fol_unas {
   Category                            String?
 }
 
-model kh {
-  Konyveles_datuma                                    DateTime? @db.Timestamp(6)
-  Tranzakcio_azonosito_                               String?
-  Tipus                                               String?
-  Konyvelesi_szamla                                   String?
-  Konyvelesi_szamla_elnevezese                        String?
-  Partner_szamla                                      String?
-  Partner_elnevezese                                  String?
-  Osszeg                                              BigInt?
-  Osszeg_devizaneme                                   String?
-  Kozlemeny                                           String?
-  Tranzakciot_indito_tenyleges_fizeto_fel_neve_       Float?
-  A_tenyleges_fizeto_azonositojanak_tipusa_           Float?
-  Tranzakciot_indito_tenyleges_fizeto_fel_azonositoja Float?
-  Tenyleges_kedvezmenyezett_neve_                     Float?
-  Tenyleges_kedvezmenyezett_azonositoja_              Float?
-  Tenyleges_kedvezmenyezett_azonositojanak_tipusa     Float?
-  Partnerek_kozti_egyedi_azonosito_                   String?
-  Szervezetazonosito                                  Float?
-  Atutalas_jogcime_                                   Float?
-  Atutalas_jogcim_kategoriaja_                        Float?
-  Partner_masodlagos_szamlaazonosito                  Float?
-  id                                                  Int       @id(map: "id") @default(autoincrement())
-}
-
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
 model pro_bev_telek {
   Azonosito                  String?
@@ -801,19 +832,20 @@ model starting_closing_cf {
 }
 
 model Account {
-  id                String  @id @default(cuid())
+  id                String       @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? // @db.Text
-  access_token      String? // @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? // @db.Text
+  id_token          String?
   session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Penztarcak        Penztarcak[]
 
   @@unique([provider, providerAccountId])
 }
@@ -842,4 +874,32 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Koltsegek {
+  Konyveles_datuma                                    DateTime? @db.Timestamp(6)
+  Tranzakcio_azonosito_                               String?
+  Tipus                                               String?
+  Konyvelesi_szamla                                   String?
+  Konyvelesi_szamla_elnevezese                        String?
+  Partner_szamla                                      String?
+  Partner_elnevezese                                  String?
+  Osszeg                                              BigInt?
+  Osszeg_devizaneme                                   String?
+  Kozlemeny                                           String?
+  Tranzakciot_indito_tenyleges_fizeto_fel_neve_       Float?
+  A_tenyleges_fizeto_azonositojanak_tipusa_           Float?
+  Tranzakciot_indito_tenyleges_fizeto_fel_azonositoja Float?
+  Tenyleges_kedvezmenyezett_neve_                     Float?
+  Tenyleges_kedvezmenyezett_azonositoja_              Float?
+  Tenyleges_kedvezmenyezett_azonositojanak_tipusa     Float?
+  Partnerek_kozti_egyedi_azonosito_                   String?
+  Szervezetazonosito                                  Float?
+  Atutalas_jogcime_                                   Float?
+  Atutalas_jogcim_kategoriaja_                        Float?
+  Partner_masodlagos_szamlaazonosito                  Float?
+  id                                                  Int       @id(map: "id") @default(autoincrement())
+  vallet                                              String?   @default("K&H")
+
+  @@map("Koltsegek")
 }

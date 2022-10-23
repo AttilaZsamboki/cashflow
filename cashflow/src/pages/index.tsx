@@ -17,6 +17,10 @@ import PieChart from "../components/PieChart";
 import DatePicker from "../components/DatePicker";
 import LinkCards from "../components/LinkCards";
 import RadioListButton from "../components/RadioListButton";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { trpc } from "../utils/trpc";
+import * as React from "react";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 
 ChartJS.register(
   CategoryScale,
@@ -41,9 +45,39 @@ export const options = {
   },
 };
 
+const columns: GridColDef[] = [
+  {
+    field: "Konyveles_datuma",
+    headerName: "Dátum",
+    width: 200,
+  },
+  {
+    field: "name",
+    headerName: "Tétel",
+    width: 130,
+  },
+  { field: "Osszeg", headerName: "Költség", headerClassName: "font-bold" },
+  { field: "vallet", headerName: "Pénztárca", headerClassName: "font-bold" },
+  {
+    field: "type",
+    headerName: "Típus",
+    width: 150,
+  },
+];
+
 const Home: NextPage = () => {
+  const expenses = trpc.expenses.getAll.useQuery().data;
+  const vallets = trpc.expenses.getAllVallets.useQuery();
+  const all = trpc.expenses.getAllIncomeExpense.useQuery();
+  const [animationParent] = useAutoAnimate<HTMLDivElement>();
+  const [selectedVallets, setSelectedVallets] = React.useState([""]);
+  React.useEffect(() => {
+    if (vallets.data) {
+      setSelectedVallets(vallets.data?.map((vallet) => vallet.name));
+    }
+  }, [vallets.data]);
   return (
-    <div>
+    <div ref={animationParent}>
       <Navbar currentPage="Főoldal" />
       <StatCard
         data={[
@@ -61,13 +95,44 @@ const Home: NextPage = () => {
         <PieChart options={options} type="Költség Kategóriák" />
         <DatePicker />
         <RadioListButton
-          elements={[
-            { valletName: "AppaCash", balance: 10000 },
-            { valletName: "AnyaCash", balance: 200 },
-            { valletName: "K&H", balance: 500 },
-            { valletName: "AttiCash", balance: 100 },
-          ]}
+          elements={
+            !vallets.data || !all.data
+              ? "Loading..."
+              : vallets.data?.map((vallet) => {
+                  const expensesPerVallet = all.data
+                    .filter((item) => item.vallet === vallet.name)
+                    .map((item) => item.Osszeg)
+                    .reduce((a, b) => a + Number(b), 0);
+                  return {
+                    valletName: vallet.name,
+                    balance: vallet.nyito + expensesPerVallet,
+                  };
+                })
+          }
+          selectedVallets={selectedVallets ? selectedVallets : [""]}
+          setSelectedVallets={setSelectedVallets}
         />
+        <div
+          style={{
+            height: 385,
+            marginTop: -160,
+            marginLeft: -270,
+            width: "150%",
+          }}
+        >
+          <DataGrid
+            rows={
+              typeof expenses !== "undefined"
+                ? expenses.filter((expense) =>
+                    // @ts-ignore
+                    selectedVallets.includes(expense.vallet)
+                  )
+                : []
+            }
+            columns={columns}
+            className="rounded-lg bg-white opacity-90 shadow-lg shadow-gray-600"
+          />
+        </div>
         <LinkCards
           elements={[
             { href: "datas", text: "Adatok" },
