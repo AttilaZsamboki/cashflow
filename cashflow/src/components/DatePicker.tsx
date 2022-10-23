@@ -20,7 +20,7 @@ export default function DatePicker({
       onChange={(e) => {
         setStartingDate(e[0]);
         setClosingDate(e[1]);
-        setValue()
+        setValue(e);
       }}
       className="h-96 rounded-lg bg-white opacity-90 shadow-lg shadow-gray-700"
       style={{ marginTop: -160 }}
