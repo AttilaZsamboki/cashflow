@@ -61,21 +61,32 @@ export default function RadioListButton({
   elements,
   selectedVallets,
   setSelectedVallets,
+  startingClosingDate,
 }: {
   elements: { valletName: string; balance: number }[] | "Loading...";
   selectedVallets: string[];
   setSelectedVallets: React.Dispatch<string[]>;
+  startingClosingDate: Date[];
 }) {
   const [totalBalance, setTotalBalance] = React.useState<number>(0);
   const [init, setInit] = React.useState(true);
   React.useEffect(() => {
-    if (elements !== "Loading..." && init) {
+    if (!init) return;
+    if (elements !== "Loading...") {
       setTotalBalance(
         elements.map((element) => element.balance).reduce((a, b) => a + b, 0)
       );
       setInit(false);
     }
   }, [elements]);
+  React.useEffect(() => {
+    if (elements !== "Loading...") {
+      setTotalBalance(
+        elements.map((element) => element.balance).reduce((a, b) => a + b, 0)
+      );
+    }
+    setInit(false);
+  }, [startingClosingDate[0], startingClosingDate[1]]);
   if (elements === "Loading...") {
     return (
       <div className="m-4 -mt-40 -ml-40 mr-8 h-96 w-80 rounded-lg border-2 border-gray-200 bg-white text-center text-sm font-medium text-gray-900 opacity-95 shadow-lg shadow-gray-700">

@@ -62,7 +62,7 @@ export default function LineChart({
       </div>
       <div
         className="z-0 grid-flow-row-dense rounded-lg bg-white p-3 opacity-90 shadow-lg shadow-gray-700"
-        style={{ width: "88%" }}
+        style={{ width: "92%" }}
       >
         <Line options={options} data={data} />
       </div>

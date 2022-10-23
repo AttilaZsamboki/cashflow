@@ -12,7 +12,7 @@ export default function DatePicker({
   const currentDate = new Date();
   const [value, setValue] = React.useState<DateRangePickerValue>([
     new Date(currentDate.getFullYear(), 0, 1),
-    new Date(),
+    currentDate,
   ]);
   return (
     <RangeCalendar

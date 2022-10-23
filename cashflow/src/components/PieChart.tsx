@@ -10,7 +10,7 @@ export default function PieChart({
   options,
   type,
 }: {
-  options: _DeepPartialObject<CoreChartOptions<"pie">>
+  options: _DeepPartialObject<CoreChartOptions<"pie">>;
   type: string;
 }) {
   const data = {
@@ -52,7 +52,7 @@ export default function PieChart({
       </div>
       <div
         className="z-0 grid-flow-row-dense rounded-lg bg-white p-3 opacity-90 shadow-lg shadow-gray-700"
-        style={{ width: "88%" }}
+        style={{ width: "89%" }}
       >
         <Pie options={options} data={data} />
       </div>

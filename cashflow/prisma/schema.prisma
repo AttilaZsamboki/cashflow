@@ -15,7 +15,7 @@ model expenses {
   Konyvelesi_szamla_elnevezese                        String?
   Partner_szamla                                      String?
   Partner_elnevezese                                  String?
-  Osszeg                                              BigInt?
+  Osszeg                                              Int?
   Osszeg_devizaneme                                   String?
   Kozlemeny                                           String?
   Tranzakciot_indito_tenyleges_fizeto_fel_neve_       Float?
