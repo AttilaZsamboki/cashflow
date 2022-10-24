@@ -21,6 +21,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { trpc } from "../utils/trpc";
 import * as React from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { date } from "zod";
 
 const formatter = new Intl.NumberFormat("hu", {
   style: "currency",
@@ -312,7 +313,9 @@ const Home: NextPage = () => {
           <DataGrid
             rows={filteredAll ? filteredAll : [0]}
             columns={columns}
-            getRowId={(row) => row.id}
+            getRowId={(row) =>
+              row.date + row.name + row.Konyveles_datuma + row.Osszeg
+            }
             className="rounded-3xl bg-white opacity-90 shadow-lg shadow-gray-600"
           />
         </div>
