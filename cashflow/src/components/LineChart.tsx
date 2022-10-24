@@ -3,7 +3,7 @@ import { Line } from "react-chartjs-2";
 
 const getDaysArray = function (start: Date, end: Date) {
   for (
-    const arr = [], dt = new Date(start);
+    let arr = [], dt = new Date(start);
     dt <= new Date(end);
     dt.setDate(dt.getDate() + 1)
   ) {
@@ -14,8 +14,8 @@ const getDaysArray = function (start: Date, end: Date) {
         "-" +
         new Date(dt).getDate()
     );
+    return arr;
   }
-  return arr;
 };
 
 export default function LineChart({
