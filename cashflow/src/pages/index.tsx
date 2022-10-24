@@ -312,6 +312,7 @@ const Home: NextPage = () => {
           <DataGrid
             rows={filteredAll ? filteredAll : [0]}
             columns={columns}
+            getRowId={(row) => row.id}
             className="rounded-3xl bg-white opacity-90 shadow-lg shadow-gray-600"
           />
         </div>
