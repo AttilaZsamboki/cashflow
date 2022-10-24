@@ -18,18 +18,18 @@ export default function Navbar({ currentPage }: { currentPage: string }) {
     },
     {
       name: "Adatok",
-      href: "/datas",
+      href: "/vallets",
       current: currentPage === "Adatok" ? true : false,
     },
     {
       name: "Tranzakciók",
-      href: "/transactions",
+      href: "/income",
       current: currentPage === "Tranzakciók" ? true : false,
     },
     {
-      name: "Pénztárcák",
-      href: "/vallets",
-      current: currentPage === "Pénztárcák" ? true : false,
+      name: "Tervezés",
+      href: "/planning",
+      current: currentPage === "Tervezés" ? true : false,
     },
   ];
   return (

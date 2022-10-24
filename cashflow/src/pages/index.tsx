@@ -191,23 +191,23 @@ const Home: NextPage = () => {
         data={[
           {
             ammount: formatter.format(totalExpenses ? totalExpenses : 0),
-            text: "Össz. Költség",
+            text: "ÖSSZ. KÖLTSÉG",
           },
           {
             ammount: formatter.format(totalIncome),
-            text: "Össz. Bevétel",
+            text: "ÖSSZ. BEVÉTEL",
           },
           {
             ammount: totalExpenses
               ? formatter.format(totalExpenses + totalIncome)
               : formatter.format(totalIncome),
-            text: "Cashflow",
+            text: "CASHFLOW",
           },
           {
             ammount: totalExpenses
-              ? formatter.format((totalExpenses + totalIncome) * 0.9)
-              : formatter.format(totalIncome * 0.9),
-            text: "Terv",
+              ? formatter.format((totalExpenses + totalIncome) * 1.1)
+              : formatter.format(totalIncome * 1.1),
+            text: "TERV",
           },
           {
             ammount:
@@ -215,13 +215,14 @@ const Home: NextPage = () => {
                 ? "-100%"
                 : totalExpenses
                 ? Number(
-                    (totalIncome + totalExpenses) / totalIncome
+                    (totalExpenses + totalIncome) /
+                      ((totalExpenses + totalIncome) * 1.1)
                   ).toLocaleString(undefined, {
                     style: "percent",
                     minimumFractionDigits: 2,
                   })
                 : "100%",
-            text: "CF %",
+            text: "CF TÉNY/TERV %",
           },
         ]}
       />

@@ -7,7 +7,7 @@ export default function Datas() {
     <div>
       <Navbar currentPage="Adatok" />
       <SideBar
-        current={"Pénztárcák"}
+        current={"Költségtételek"}
         elements={[
           { text: "Pénztárcák", link: "vallets" },
           { text: "Kategóriák", link: "categories" },
