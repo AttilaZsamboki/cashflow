@@ -17,6 +17,7 @@ function SideBar({
         {elements.map((element) => {
           return (
             <div
+              key={element.text}
               className={
                 element.text === current
                   ? "m-2 w-full bg-gray-700 p-3 opacity-90"
