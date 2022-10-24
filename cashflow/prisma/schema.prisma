@@ -39,6 +39,17 @@ model expenses {
   @@map("expenses")
 }
 
+model zsambi_cashflow {
+  id      Int     @id()
+  date    String?
+  cf      Int?
+  expense Int?
+  income  Int?
+  vallet  String  @default("K&H")
+
+  @@map("zsambi_cashflow")
+}
+
 model Koltsegelemek {
   name                   String                   @id
   type                   String

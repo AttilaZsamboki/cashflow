@@ -1,44 +1,50 @@
 import React from "react";
 import { Line } from "react-chartjs-2";
-import { faker } from "@faker-js/faker";
 
-const labels = ["January", "February", "March", "April", "May", "June", "July"];
+const getDaysArray = function (start: Date, end: Date) {
+  for (
+    var arr = [], dt = new Date(start);
+    dt <= new Date(end);
+    dt.setDate(dt.getDate() + 1)
+  ) {
+    arr.push(
+      new Date(dt).getFullYear() +
+        "-" +
+        new Date(dt).getMonth() +
+        "-" +
+        new Date(dt).getDate()
+    );
+  }
+  return arr;
+};
 
 export default function LineChart({
   options,
   type,
+  datas,
+  startDate,
+  endDate,
 }: {
   options: any;
   type: string;
+  datas: number[];
+  startDate: Date;
+  endDate: Date;
 }) {
+  const labels = getDaysArray(startDate, endDate);
+  // console.log(datas);
   const data = {
     labels,
     datasets: [
       {
-        label: "Dataset 1",
-        data: labels.map(() => {
-          if (type === "Bevételek") {
-            return faker.datatype.number({ min: -1000, max: 1000 });
-          } else if (type === "Költségek") {
-            return faker.datatype.number({ min: -10000, max: 10000 });
-          } else if (type === "Cashflow") {
-            return faker.datatype.number({ min: -100, max: 100 });
-          }
-        }),
+        label: "Tény",
+        data: datas,
         borderColor: "rgb(255, 99, 132)",
         backgroundColor: "rgba(255, 99, 132, 0.5)",
       },
       {
-        label: "Dataset 2",
-        data: labels.map(() => {
-          if (type === "Bevételek") {
-            return faker.datatype.number({ min: -1000, max: 1000 });
-          } else if (type === "Költségek") {
-            return faker.datatype.number({ min: -10000, max: 10000 });
-          } else if (type === "Cashflow") {
-            return faker.datatype.number({ min: -100, max: 100 });
-          }
-        }),
+        label: "Terv",
+        data: datas,
         borderColor: "rgb(53, 162, 235)",
         backgroundColor: "rgba(53, 162, 235, 0.5)",
       },

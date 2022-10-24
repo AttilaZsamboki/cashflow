@@ -1,6 +1,6 @@
 import React from "react";
 
-function Card({ data, text }: { data: number; text: string }) {
+function Card({ data, text }: { data: number | string; text: string }) {
   return (
     <div className="inline-block w-full transform overflow-hidden rounded-lg bg-white text-left align-bottom opacity-90 shadow-md shadow-gray-700 transition-all sm:my-8 sm:w-1/3">
       <div className="bg-white p-5">
@@ -20,7 +20,7 @@ function Card({ data, text }: { data: number; text: string }) {
 export default function StatCard({
   data,
 }: {
-  data: { ammount: number; text: string }[];
+  data: { ammount: number | null | string; text: string }[];
 }) {
   return (
     <div
@@ -29,7 +29,11 @@ export default function StatCard({
     >
       <div className="-mb-2 sm:flex sm:space-x-4">
         {data.map((stat) => (
-          <Card data={stat.ammount} key={stat.text} text={stat.text} />
+          <Card
+            data={stat.ammount ? stat.ammount : 0}
+            key={stat.text}
+            text={stat.text}
+          />
         ))}
       </div>
     </div>
