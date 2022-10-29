@@ -16,15 +16,16 @@ const Planning: React.FC = () => {
     }
   });
   const [state, setState] = React.useState<any>([]);
-  React.useEffect(() => setState(sortable), [sortable]);
   const sortable = planGrid.map((plan) =>
     Object.entries(plan)
-      .sort(([a], [b]) => new Date(a) - new Date(b))
+      .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
       .reduce((acc, x) => {
+        // @ts-ignore
         acc[x[0].toString()] = x[1];
         return acc;
       }, {})
   );
+  React.useEffect(() => setState(sortable), [sortable]);
   console.log(state);
   return (
     <>
