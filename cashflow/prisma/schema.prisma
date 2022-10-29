@@ -1,53 +1,15 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
-}
-
-model expenses {
-  Konyveles_datuma                                    DateTime? @db.Timestamp(6)
-  Tranzakcio_azonosito_                               String?
-  Tipus                                               String?
-  Konyvelesi_szamla                                   String?
-  Konyvelesi_szamla_elnevezese                        String?
-  Partner_szamla                                      String?
-  Partner_elnevezese                                  String?
-  Osszeg                                              Int?
-  Osszeg_devizaneme                                   String?
-  Kozlemeny                                           String?
-  Tranzakciot_indito_tenyleges_fizeto_fel_neve_       Float?
-  A_tenyleges_fizeto_azonositojanak_tipusa_           Float?
-  Tranzakciot_indito_tenyleges_fizeto_fel_azonositoja Float?
-  Tenyleges_kedvezmenyezett_neve_                     Float?
-  Tenyleges_kedvezmenyezett_azonositoja_              Float?
-  Tenyleges_kedvezmenyezett_azonositojanak_tipusa     Float?
-  Partnerek_kozti_egyedi_azonosito_                   String?
-  Szervezetazonosito                                  Float?
-  Atutalas_jogcime_                                   Float?
-  Atutalas_jogcim_kategoriaja_                        Float?
-  Partner_masodlagos_szamlaazonosito                  Float?
-  id                                                  Int       @id() @unique @default(autoincrement())
-  vallet                                              String?   @default("K&H")
-  kategory                                            String?
-  name                                                String?
-  type                                                String?
-  minta                                               String?
-
-  @@map("expenses")
-}
-
-model zsambi_cashflow {
-  id      Int     @id()
-  date    String?
-  cf      Int?
-  expense Int?
-  income  Int?
-  vallet  String  @default("K&H")
-
-  @@map("zsambi_cashflow")
+model Koltsegkategoriak {
+  id   String @id @default(cuid())
+  name String
 }
 
 model Koltsegelemek {
@@ -77,10 +39,10 @@ model KoltsegelemKapcsolatok {
 
 model Penztarcak {
   id        String  @id @default(cuid())
-  account   Account @relation(fields: [accountId], references: [id])
   accountId String
   nyito     Int
   name      String
+  account   Account @relation(fields: [accountId], references: [id])
 }
 
 model auth_group {
@@ -911,6 +873,51 @@ model Koltsegek {
   Partner_masodlagos_szamlaazonosito                  Float?
   id                                                  Int       @id(map: "id") @default(autoincrement())
   vallet                                              String?   @default("K&H")
+}
 
-  @@map("Koltsegek")
+model cashflow_planner_table {
+  name            String
+  day             String
+  planned_expense Int?
+
+  @@id([name, day])
+}
+
+model zsambi_cashflow {
+  date    DateTime
+  cf      Int
+  expense Int
+  income  Int
+  id      Int      @id
+  vallet  String?  @default("K&H")
+}
+
+model expenses {
+  Konyveles_datuma                                    DateTime? @db.Timestamp(6)
+  Tranzakcio_azonosito_                               String?
+  Tipus                                               String?
+  Konyvelesi_szamla                                   String?
+  Konyvelesi_szamla_elnevezese                        String?
+  Partner_szamla                                      String?
+  Partner_elnevezese                                  String?
+  Osszeg                                              BigInt?
+  Osszeg_devizaneme                                   String?
+  Kozlemeny                                           String?
+  Tranzakciot_indito_tenyleges_fizeto_fel_neve_       Float?
+  A_tenyleges_fizeto_azonositojanak_tipusa_           Float?
+  Tranzakciot_indito_tenyleges_fizeto_fel_azonositoja Float?
+  Tenyleges_kedvezmenyezett_neve_                     Float?
+  Tenyleges_kedvezmenyezett_azonositoja_              Float?
+  Tenyleges_kedvezmenyezett_azonositojanak_tipusa     Float?
+  Partnerek_kozti_egyedi_azonosito_                   String?
+  Szervezetazonosito                                  Float?
+  Atutalas_jogcime_                                   Float?
+  Atutalas_jogcim_kategoriaja_                        Float?
+  Partner_masodlagos_szamlaazonosito                  Float?
+  id                                                  Int       @id
+  vallet                                              String?   @default("K&H")
+  kategory                                            String
+  name                                                String
+  type                                                String
+  minta                                               String
 }

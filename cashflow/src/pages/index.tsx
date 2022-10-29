@@ -21,7 +21,6 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { trpc } from "../utils/trpc";
 import * as React from "react";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { date } from "zod";
 
 const formatter = new Intl.NumberFormat("hu", {
   style: "currency",
