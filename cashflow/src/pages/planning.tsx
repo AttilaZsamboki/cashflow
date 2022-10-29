@@ -19,8 +19,7 @@ const Planning: React.FC = () => {
   const sortable = planGrid.map((plan) =>
     Object.entries(plan)
       .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
-      .reduce((acc, x) => {
-        // @ts-ignore
+      .reduce((acc: any, x) => {
         acc[x[0].toString()] = x[1];
         return acc;
       }, {})
