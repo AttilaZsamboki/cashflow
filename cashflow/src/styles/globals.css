@@ -5,3 +5,11 @@
 body {
   background-color: #747378;
 }
+
+.basic-card {
+  @apply rounded-lg border border-gray-400 bg-white opacity-90 shadow-md shadow-gray-600;
+}
+
+.stat-card {
+  @apply basic-card m-2 bg-white;
+}

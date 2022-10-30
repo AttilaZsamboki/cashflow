@@ -263,6 +263,7 @@ const Home: NextPage = () => {
         />
         <PieChart options={options} type="Költség Kategóriák" />
         <DatePicker
+          className="basic-card -mt-40 h-96 w-80"
           setStartingDate={setStartingDate}
           setClosingDate={setClosingDate}
         />

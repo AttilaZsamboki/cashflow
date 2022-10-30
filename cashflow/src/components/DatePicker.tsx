@@ -5,9 +5,11 @@ import "dayjs/locale/hu";
 export default function DatePicker({
   setStartingDate,
   setClosingDate,
+  className,
 }: {
   setStartingDate: React.Dispatch<Date>;
   setClosingDate: React.Dispatch<Date>;
+  className?: string;
 }) {
   const currentDate = new Date();
   const [value, setValue] = React.useState<DateRangePickerValue>([
@@ -16,14 +18,13 @@ export default function DatePicker({
   ]);
   return (
     <RangeCalendar
+      className={className}
       value={value}
       onChange={(e) => {
         setStartingDate(e[0]);
         setClosingDate(e[1]);
         setValue(e);
       }}
-      className="h-96 rounded-lg bg-white opacity-90 shadow-lg shadow-gray-700"
-      style={{ marginTop: -160 }}
       locale="hu"
     />
   );

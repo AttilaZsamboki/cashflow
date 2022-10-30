@@ -22,7 +22,7 @@ model Koltsegelemek {
 }
 
 model Partnerek {
-  id                     String                   @id
+  id                     String                   @id @default(cuid())
   name                   String
   KoltsegelemKapcsolatok KoltsegelemKapcsolatok[]
   Koltsegtetelek         Koltsegelemek[]
