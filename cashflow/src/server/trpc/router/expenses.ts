@@ -11,14 +11,14 @@ export const expenseRouter = router({
     return result;
   }),
   getAllIncomeExpense: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.koltsegek.findMany();
+    return ctx.prisma.tetelek.findMany();
   }),
   getCashflowSummary: publicProcedure.query(({ ctx }) => {
     const result = ctx.prisma.zsambi_cashflow.findMany();
     return result;
   }),
-  getCashflowPlanner: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.cashflow_planner_table.findMany();
+  getCashflowPlanner: publicProcedure.query(async ({ ctx }) => {
+    return await ctx.prisma.cashflow_planner_table.findMany();
   }),
   updateCashflowPlanner: publicProcedure
     .input(z.object({ field: z.string(), id: z.string(), value: z.number() }))

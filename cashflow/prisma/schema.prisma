@@ -7,34 +7,48 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Koltsegkategoriak {
-  id   String @id @default(cuid())
-  name String
+model fokategoriak {
+  id           String         @id() @default(cuid())
+  name         String
+  tipus        String
+  alkategoriak alkategoriak[]
+  elemek       elemek[]
 }
 
-model Koltsegelemek {
-  name                   String                   @id
-  type                   String
-  kategory               String
-  partnerId              String
-  partner                Partnerek                @relation(fields: [partnerId], references: [id])
-  KoltsegelemKapcsolatok KoltsegelemKapcsolatok[]
+model alkategoriak {
+  id             String       @id(map: "Koltsegkategoriak_pkey") @default(cuid())
+  name           String
+  tipus          String       @default("kiadás")
+  fokategoria    fokategoriak @relation(fields: [fokategoriakId], references: [id])
+  elemek         elemek[]
+  fokategoriakId String
+}
+
+model elemek {
+  name           String        @id(map: "Koltsegelemek_pkey")
+  type           String?
+  partnerId      String
+  partner        Partnerek?    @relation(fields: [partnerId], references: [id], map: "Koltsegelemek_partnerId_fkey")
+  kategoriakId   String?
+  elem_tipus     String        @default("kiadás")
+  alkategoria    alkategoriak? @relation(fields: [kategoriakId], references: [id])
+  fokategoria    fokategoriak? @relation(fields: [fokategoriakId], references: [id])
+  fokategoriakId String?
 }
 
 model Partnerek {
-  id                     String                   @id @default(cuid())
+  id                     String             @id @default(cuid())
   name                   String
-  KoltsegelemKapcsolatok KoltsegelemKapcsolatok[]
-  Koltsegtetelek         Koltsegelemek[]
+  KoltsegelemKapcsolatok elem_kapcsolatok[]
+  Koltsegtetelek         elemek[]
 }
 
-model KoltsegelemKapcsolatok {
-  id            String        @id @default(cuid())
+model elem_kapcsolatok {
+  id            String    @id(map: "KoltsegelemKapcsolatok_pkey") @default(cuid())
   minta         String
   koltsegelemId String
   partnerekId   String
-  koltsegelem   Koltsegelemek @relation(fields: [koltsegelemId], references: [name])
-  partner       Partnerek     @relation(fields: [partnerekId], references: [id])
+  partner       Partnerek @relation(fields: [partnerekId], references: [id], map: "KoltsegelemKapcsolatok_partnerekId_fkey")
 }
 
 model Penztarcak {
@@ -389,7 +403,7 @@ model fol_product_suppliers {
   Supplier___1___VAT                    String?
   Supplier___1___VAT_                   Float?
   Supplier___1___Currency               String?
-  Supplier___1___Barcode                Float?
+  Supplier___1___Barcode                String?
   Supplier___1___Reference              String?
   Supplier___1___Product_Name           String?
   Supplier___1___Minimum_Order_Quantity Float?
@@ -849,7 +863,7 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model Koltsegek {
+model tetelek {
   Konyveles_datuma                                    DateTime? @db.Timestamp(6)
   Tranzakcio_azonosito_                               String?
   Tipus                                               String?
@@ -879,8 +893,18 @@ model cashflow_planner_table {
   name            String
   day             String
   planned_expense Int?
+  tipus           String
 
   @@id([name, day])
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model tmd_processed_orders {
+  id       Int     @default(autoincrement())
+  order_id String? @db.VarChar(100)
+  status   String?
+
+  @@ignore
 }
 
 model zsambi_cashflow {

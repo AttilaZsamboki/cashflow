@@ -16,20 +16,54 @@ const Planning: React.FC = () => {
   const [closingDate, setClosingDate] = React.useState<Date>();
   const plans = trpc.expenses.getCashflowPlanner.useQuery();
   const mutation = trpc.expenses.updateCashflowPlanner.useMutation();
-  const planGrid: Array<any> = [];
-  plans.data?.forEach((plan) => {
-    const category = planGrid.find((p) => p.Tétel === plan.name);
-    if (category) {
-      category[plan.day] = plan.planned_expense;
-    } else {
-      planGrid.push({ Tétel: plan.name });
-    }
-  });
-  const [state, setState] = React.useState<any>([]);
+  const expensePlanGrid: Array<any> = [];
+  const incomePlanGrid: Array<any> = [];
+  const investmentPlanGrid: Array<any> = [];
+  const financingPlanGrid: Array<any> = [];
+  const [expenseState, setExpenseState] = React.useState<any>([]);
+  const [incomeState, setIncomeState] = React.useState<any>([]);
+  const [investmentState, setInvestmentState] = React.useState<any>([]);
+  const [financingState, setFinancingState] = React.useState<any>([]);
+  const sorter = (type: string) => {
+    plans.data
+      ?.filter((items) => items.tipus === type)
+      .forEach((plan) => {
+        let category;
+        if (type === "kiadás") {
+          category = expensePlanGrid.find((p) => p.Tétel === plan.name);
+        } else if (type === "bevétel") {
+          category = incomePlanGrid.find((p) => p.Tétel === plan.name);
+        } else if (type === "beruházás") {
+          category = investmentPlanGrid.find((p) => p.Tétel === plan.name);
+        } else if (type === "finanszírozás") {
+          category = financingPlanGrid.find((p) => p.Tétel === plan.name);
+        }
+        if (category) {
+          category[plan.day] = plan.planned_expense;
+        } else {
+          if (type === "kiadás") {
+            expensePlanGrid.push({ Tétel: plan.name });
+          } else if (type === "bevétel") {
+            incomePlanGrid.push({ Tétel: plan.name });
+          } else if (type === "beruházás") {
+            investmentPlanGrid.push({ Tétel: plan.name });
+          } else if (type === "finanszírozás") {
+            financingPlanGrid.push({ Tétel: plan.name });
+          }
+        }
+        if (category) {
+          category[plan.day] = plan.planned_expense;
+        }
+      });
+  };
+  sorter("kiadás");
+  sorter("bevétel");
+  sorter("beruházás");
+  sorter("finanszírozás");
   React.useEffect(
     () =>
-      setState(
-        planGrid.map((plan) =>
+      setFinancingState(
+        financingPlanGrid.map((plan) =>
           Object.entries(plan)
             .filter((entries) => {
               if (Date.parse(entries[0])) {
@@ -59,7 +93,112 @@ const Planning: React.FC = () => {
             }, {})
         )
       ),
-    [planGrid, startingDate, closingDate]
+    [financingPlanGrid, startingDate, closingDate]
+  );
+  React.useEffect(
+    () =>
+      setExpenseState(
+        expensePlanGrid.map((plan) =>
+          Object.entries(plan)
+            .filter((entries) => {
+              if (Date.parse(entries[0])) {
+                if (closingDate) {
+                  return (
+                    new Date(entries[0]) >=
+                      (startingDate ? startingDate : new Date("2022-01-01")) &&
+                    new Date(entries[0]) <=
+                      (closingDate ? closingDate : new Date())
+                  );
+                } else {
+                  return (
+                    new Date(entries[0]).toDateString() ===
+                    (startingDate
+                      ? startingDate.toDateString()
+                      : new Date().toDateString())
+                  );
+                }
+              } else {
+                return true;
+              }
+            })
+            .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
+            .reduce((acc: any, x) => {
+              acc[x[0].toString()] = x[1];
+              return acc;
+            }, {})
+        )
+      ),
+    [expensePlanGrid, startingDate, closingDate]
+  );
+  React.useEffect(
+    () =>
+      setIncomeState(
+        incomePlanGrid.map((plan) =>
+          Object.entries(plan)
+            .filter((entries) => {
+              if (Date.parse(entries[0])) {
+                if (closingDate) {
+                  return (
+                    new Date(entries[0]) >=
+                      (startingDate ? startingDate : new Date("2022-01-01")) &&
+                    new Date(entries[0]) <=
+                      (closingDate ? closingDate : new Date())
+                  );
+                } else {
+                  return (
+                    new Date(entries[0]).toDateString() ===
+                    (startingDate
+                      ? startingDate.toDateString()
+                      : new Date().toDateString())
+                  );
+                }
+              } else {
+                return true;
+              }
+            })
+            .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
+            .reduce((acc: any, x) => {
+              acc[x[0].toString()] = x[1];
+              return acc;
+            }, {})
+        )
+      ),
+    [incomePlanGrid, startingDate, closingDate]
+  );
+  React.useEffect(
+    () =>
+      setInvestmentState(
+        investmentPlanGrid.map((plan) =>
+          Object.entries(plan)
+            .filter((entries) => {
+              if (Date.parse(entries[0])) {
+                if (closingDate) {
+                  return (
+                    new Date(entries[0]) >=
+                      (startingDate ? startingDate : new Date("2022-01-01")) &&
+                    new Date(entries[0]) <=
+                      (closingDate ? closingDate : new Date())
+                  );
+                } else {
+                  return (
+                    new Date(entries[0]).toDateString() ===
+                    (startingDate
+                      ? startingDate.toDateString()
+                      : new Date().toDateString())
+                  );
+                }
+              } else {
+                return true;
+              }
+            })
+            .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
+            .reduce((acc: any, x) => {
+              acc[x[0].toString()] = x[1];
+              return acc;
+            }, {})
+        )
+      ),
+    [investmentPlanGrid, startingDate, closingDate]
   );
   const screenWidth = 1100;
   return (
@@ -72,7 +211,7 @@ const Planning: React.FC = () => {
             style={{ height: screenWidth * 0.5 - 114 - 28 * 2 }}
           >
             <DataGrid
-              rows={state}
+              rows={incomeState}
               getRowId={(row: any) => row.Tétel}
               onCellEditCommit={(row) => {
                 mutation.mutate({
@@ -82,8 +221,8 @@ const Planning: React.FC = () => {
                 });
               }}
               columns={
-                state[0]
-                  ? Object.keys(state[0]).map((key) => {
+                incomeState[0]
+                  ? Object.keys(incomeState[0]).map((key) => {
                       if (key !== "Tétel") {
                         return {
                           field: key,
@@ -112,7 +251,7 @@ const Planning: React.FC = () => {
             style={{ height: screenWidth * 0.5 - 114 - 28 * 2 }}
           >
             <DataGrid
-              rows={state}
+              rows={investmentState}
               getRowId={(row: any) => row.Tétel}
               onCellEditCommit={(row) => {
                 mutation.mutate({
@@ -122,8 +261,8 @@ const Planning: React.FC = () => {
                 });
               }}
               columns={
-                state[0]
-                  ? Object.keys(state[0]).map((key) => {
+                investmentState[0]
+                  ? Object.keys(investmentState[0]).map((key) => {
                       if (key !== "Tétel") {
                         return {
                           field: key,
@@ -152,7 +291,7 @@ const Planning: React.FC = () => {
             style={{ height: screenWidth * 0.5 - 114 - 28 * 2 }}
           >
             <DataGrid
-              rows={state}
+              rows={financingState}
               getRowId={(row: any) => row.Tétel}
               onCellEditCommit={(row) => {
                 mutation.mutate({
@@ -162,8 +301,8 @@ const Planning: React.FC = () => {
                 });
               }}
               columns={
-                state[0]
-                  ? Object.keys(state[0]).map((key) => {
+                financingState[0]
+                  ? Object.keys(financingState[0]).map((key) => {
                       if (key !== "Tétel") {
                         return {
                           field: key,
@@ -188,7 +327,7 @@ const Planning: React.FC = () => {
         </div>
         <div className="basic-card col-span-3 !mt-6 mr-3">
           <DataGrid
-            rows={state}
+            rows={expenseState}
             getRowId={(row: any) => row.Tétel}
             onCellEditCommit={(row) => {
               mutation.mutate({
@@ -198,8 +337,8 @@ const Planning: React.FC = () => {
               });
             }}
             columns={
-              state[0]
-                ? Object.keys(state[0]).map((key) => {
+              expenseState[0]
+                ? Object.keys(expenseState[0]).map((key) => {
                     if (key !== "Tétel") {
                       return {
                         field: key,
@@ -223,7 +362,7 @@ const Planning: React.FC = () => {
         </div>
         <div className="basic-card col-span-7 ml-3">
           <DataGrid
-            rows={state}
+            rows={expenseState}
             getRowId={(row: any) => row.Tétel}
             onCellEditCommit={(row) => {
               mutation.mutate({
@@ -233,8 +372,8 @@ const Planning: React.FC = () => {
               });
             }}
             columns={
-              state[0]
-                ? Object.keys(state[0]).map((key) => {
+              expenseState[0]
+                ? Object.keys(expenseState[0]).map((key) => {
                     if (key !== "Tétel") {
                       return {
                         field: key,
@@ -268,7 +407,12 @@ const Planning: React.FC = () => {
               Bevételek:
             </div>
             <div className="mt-1 ml-8 text-3xl font-semibold text-gray-700">
-              {formatter.format(2000000)}
+              {formatter.format(
+                incomeState
+                  .map((e: any) => Object.values(e).slice(1))
+                  .map((e: any) => e.reduce((a: any, b: any) => a + b, 0))
+                  .reduce((a: any, b: any) => a + b, 0)
+              )}
             </div>
           </div>
           <div className="stat-card">
@@ -277,7 +421,7 @@ const Planning: React.FC = () => {
             </div>
             <div className="mt-1 ml-8 text-3xl font-semibold text-gray-700">
               {formatter.format(
-                state
+                expenseState
                   .map((e: any) => Object.values(e).slice(1))
                   .map((e: any) => e.reduce((a: any, b: any) => a + b, 0))
                   .reduce((a: any, b: any) => a + b, 0)
@@ -289,15 +433,52 @@ const Planning: React.FC = () => {
               Cashflow:
             </div>
             <div className="mt-1 ml-8 text-3xl font-semibold text-gray-700">
-              {formatter.format(17000000)}
+              {formatter.format(
+                incomeState
+                  .map((e: any) => Object.values(e).slice(1))
+                  .map((e: any) => e.reduce((a: any, b: any) => a + b, 0))
+                  .reduce((a: any, b: any) => a + b, 0) -
+                  expenseState
+                    .map((e: any) => Object.values(e).slice(1))
+                    .map((e: any) => e.reduce((a: any, b: any) => a + b, 0))
+                    .reduce((a: any, b: any) => a + b, 0) -
+                  financingState
+                    .map((e: any) => Object.values(e).slice(1))
+                    .map((e: any) => e.reduce((a: any, b: any) => a + b, 0))
+                    .reduce((a: any, b: any) => a + b, 0) -
+                  investmentState
+                    .map((e: any) => Object.values(e).slice(1))
+                    .map((e: any) => e.reduce((a: any, b: any) => a + b, 0))
+                    .reduce((a: any, b: any) => a + b, 0)
+              )}
             </div>
           </div>
-          <div className="stat-card">
-            <div className="text-md mt-10 ml-8 font-medium uppercase leading-6 text-gray-400">
-              Egyéb:
+          <div>
+            <div className="stat-card">
+              <div className="text-md ml-8 py-3 font-medium uppercase leading-6 text-gray-400">
+                Finanszírozások:
+              </div>
+              <div className="-mt-2 ml-8 pb-3 text-3xl font-semibold text-gray-700">
+                {formatter.format(
+                  financingState
+                    .map((e: any) => Object.values(e).slice(1))
+                    .map((e: any) => e.reduce((a: any, b: any) => a + b, 0))
+                    .reduce((a: any, b: any) => a + b, 0)
+                )}
+              </div>
             </div>
-            <div className="mt-1 ml-8 text-3xl font-semibold text-gray-700">
-              {formatter.format(1000000)}
+            <div className="stat-card">
+              <div className="text-md ml-8 py-3 font-medium uppercase leading-6 text-gray-400">
+                Beruházások:
+              </div>
+              <div className="-mt-2 ml-8 pb-2 text-3xl font-semibold text-gray-700">
+                {formatter.format(
+                  investmentState
+                    .map((e: any) => Object.values(e).slice(1))
+                    .map((e: any) => e.reduce((a: any, b: any) => a + b, 0))
+                    .reduce((a: any, b: any) => a + b, 0)
+                )}
+              </div>
             </div>
           </div>
         </div>
