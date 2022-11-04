@@ -32,4 +32,36 @@ export const expenseRouter = router({
       });
       return plannedCash;
     }),
+  getCategoriesByType: publicProcedure
+    .input(z.object({ type: z.string() }))
+    .query(({ ctx, input }) => {
+      const { type } = input;
+      return ctx.prisma.kategoriak.findMany({
+        where: { tipus: type },
+      });
+    }),
+  getItemByType: publicProcedure
+    .input(z.object({ type: z.string() }))
+    .query(({ ctx, input }) => {
+      const { type } = input;
+      return ctx.prisma.elemek.findMany({
+        where: { elem_tipus: type },
+      });
+    }),
+  getConnectionsByType: publicProcedure
+    .input(z.object({ type: z.string() }))
+    .query(({ ctx, input }) => {
+      const { type } = input;
+      return ctx.prisma.elem_kapcsolatok.findMany({
+        where: { tipus: type },
+      });
+    }),
+  getTypeByType: publicProcedure
+    .input(z.object({ type: z.string() }))
+    .query(({ ctx, input }) => {
+      const { type } = input;
+      return ctx.prisma.tipusok.findMany({
+        where: {tipus: type },
+      })
+    })
 });

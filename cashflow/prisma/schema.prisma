@@ -7,38 +7,35 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model fokategoriak {
-  id           String         @id() @default(cuid())
-  name         String
-  tipus        String
-  alkategoriak alkategoriak[]
-  elemek       elemek[]
+model kategoriak {
+  id          String   @id(map: "Koltsegkategoriak_pkey") @default(cuid())
+  name        String   @unique
+  tipus       String   @default("költség")
+  is_main     Boolean  @default(true)
+  parent_name String
+  is_active   Boolean  @default(true)
+  elemek      elemek[]
 }
 
-model alkategoriak {
-  id             String       @id(map: "Koltsegkategoriak_pkey") @default(cuid())
-  name           String
-  tipus          String       @default("kiadás")
-  fokategoria    fokategoriak @relation(fields: [fokategoriakId], references: [id])
-  elemek         elemek[]
-  fokategoriakId String
+model tipusok {
+  name  String @id
+  tipus String
 }
 
 model elemek {
-  name           String        @id(map: "Koltsegelemek_pkey")
-  type           String?
-  partnerId      String
-  partner        Partnerek?    @relation(fields: [partnerId], references: [id], map: "Koltsegelemek_partnerId_fkey")
-  kategoriakId   String?
-  elem_tipus     String        @default("kiadás")
-  alkategoria    alkategoriak? @relation(fields: [kategoriakId], references: [id])
-  fokategoria    fokategoriak? @relation(fields: [fokategoriakId], references: [id])
-  fokategoriakId String?
+  name             String             @id(map: "Koltsegelemek_pkey")
+  type             String?
+  partnerName      String?
+  partner          Partnerek?         @relation(fields: [partnerName], references: [name], map: "Koltsegelemek_partnerId_fkey")
+  kategoriakName   String?
+  kategoriak       kategoriak?        @relation(fields: [kategoriakName], references: [name])
+  elem_tipus       String
+  elem_kapcsolatok elem_kapcsolatok[]
 }
 
 model Partnerek {
   id                     String             @id @default(cuid())
-  name                   String
+  name                   String             @unique
   KoltsegelemKapcsolatok elem_kapcsolatok[]
   Koltsegtetelek         elemek[]
 }
@@ -46,9 +43,11 @@ model Partnerek {
 model elem_kapcsolatok {
   id            String    @id(map: "KoltsegelemKapcsolatok_pkey") @default(cuid())
   minta         String
-  koltsegelemId String
-  partnerekId   String
-  partner       Partnerek @relation(fields: [partnerekId], references: [id], map: "KoltsegelemKapcsolatok_partnerekId_fkey")
+  elem          elemek    @relation(fields: [elemekName], references: [name])
+  partnerekName String
+  partner       Partnerek @relation(fields: [partnerekName], references: [name], map: "KoltsegelemKapcsolatok_partnerekId_fkey")
+  tipus         String
+  elemekName    String
 }
 
 model Penztarcak {
@@ -940,8 +939,8 @@ model expenses {
   Partner_masodlagos_szamlaazonosito                  Float?
   id                                                  Int       @id
   vallet                                              String?   @default("K&H")
-  kategory                                            String
-  name                                                String
-  type                                                String
-  minta                                               String
+  kategory                                            String?
+  name                                                String?
+  type                                                String?
+  minta                                               String?
 }

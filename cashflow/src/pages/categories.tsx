@@ -11,7 +11,7 @@ export default function Datas() {
         elements={[
           { text: "Pénztárcák", link: "vallets" },
           { text: "Kategóriák", link: "categories" },
-          { text: "Költségtételek", link: "cost-items" },
+          { text: "Tételek", link: "items" },
         ]}
       />
     </div>
