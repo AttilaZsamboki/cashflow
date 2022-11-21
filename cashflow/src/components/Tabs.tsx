@@ -21,7 +21,7 @@ export default function Tabs({
   itemType: string;
   items: any;
 }) {
-  const [animateParent] = useAutoAnimate();
+  const [animateParent] = useAutoAnimate<HTMLDivElement>();
   const types = trpc.expenses.getTypeByType.useQuery({
     type: itemType,
   });
@@ -450,7 +450,7 @@ export default function Tabs({
               </div>
               <div className="relative top-2 left-72 ml-1">
                 <DeleteButton
-                  onClick={(e) => {
+                  onClick={(e: any) => {
                     e.preventDefault();
                     setSelectedConnectionItem("");
                     setSelectedConnectionPartner("");
