@@ -1,5 +1,5 @@
 import { signIn, signOut, useSession } from "next-auth/react";
-import Button from "./Button";
+import Button from "./SubmitButton";
 
 const Auth: React.FC = () => {
   const { data: sessionData } = useSession();

@@ -38,6 +38,7 @@ model Partnerek {
   name                   String             @unique
   KoltsegelemKapcsolatok elem_kapcsolatok[]
   Koltsegtetelek         elemek[]
+  tipus                  String             @default("költség")
 }
 
 model elem_kapcsolatok {
@@ -907,12 +908,12 @@ model tmd_processed_orders {
 }
 
 model zsambi_cashflow {
-  date    DateTime
+  date    String
   cf      Int
   expense Int
   income  Int
-  id      Int      @id
-  vallet  String?  @default("K&H")
+  id      Int     @id
+  vallet  String? @default("K&H")
 }
 
 model expenses {

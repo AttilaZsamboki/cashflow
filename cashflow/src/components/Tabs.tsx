@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { Tab } from "@headlessui/react";
-import { Fragment } from "react";
-import { Combobox, Transition } from "@headlessui/react";
-import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/20/solid";
 import { trpc } from "../utils/trpc";
+import DropdownList from "./DropdownList";
+import SubmitButton from "./SubmitButton";
+import DeleteButton from "./DeleteButton";
+import SwitchButton from "./Switch";
+import FormField from "./FormField";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
@@ -12,25 +15,200 @@ function classNames(...classes: any) {
 export default function Tabs({
   tabNames,
   itemType,
+  items,
 }: {
   tabNames: string[];
   itemType: string;
+  items: any;
 }) {
+  const [animateParent] = useAutoAnimate();
   const types = trpc.expenses.getTypeByType.useQuery({
     type: itemType,
   });
-  const [selected, setSelected] = useState<string>("");
-  const [query, setQuery] = useState("");
+  const partners = trpc.expenses.getPartnersByType.useQuery({
+    type: itemType,
+  });
+  const categories = trpc.expenses.getCategoriesByType.useQuery({
+    type: itemType,
+  });
+  const connections = trpc.expenses.getConnectionsByType.useQuery({
+    type: itemType,
+  });
+  const utils = trpc.useContext();
+  const itemCreation = trpc.expenses.createItem.useMutation({
+    async onMutate({ name, category, elem_tipus, partner, type }) {
+      await utils.expenses.getItemByType.cancel();
+      const tasks = items.data ?? [];
+      utils.expenses.getItemByType.setData(
+        [
+          ...tasks,
+          {
+            name: name,
+            elem_tipus: elem_tipus,
+            kategoriakName: category,
+            partnerName: partner,
+            type: type,
+          },
+        ],
+        { type: itemType }
+      );
+    },
+  });
+  const categoryCreation = trpc.expenses.createCategory.useMutation({
+    async onMutate({ is_main, name, parent_name, tipus, is_active }) {
+      await utils.expenses.getCategoriesByType.cancel();
+      const tasks = categories.data ?? [];
+      utils.expenses.getCategoriesByType.setData(
+        [
+          ...tasks,
+          {
+            is_main: is_main,
+            name: name,
+            parent_name: parent_name,
+            tipus: tipus,
+            is_active: is_active,
+            id: `${Math.random()}`,
+          },
+        ],
+        { type: itemType }
+      );
+    },
+  });
+  const [selectedItemType, setSelectedItemType] = useState<string>("");
+  const [selectedItemPartner, setSelectedItemPartner] = useState<string>("");
+  const [selectedItemCategory, setSelectedItemCategory] = useState<string>("");
+  const [selectedItemName, setSelectedItemName] = useState<string>("");
+  const handleItemSubmit = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    itemCreation.mutate({
+      name: selectedItemName,
+      elem_tipus: itemType,
+      category: selectedItemCategory,
+      partner: selectedItemPartner,
+      type: selectedItemType,
+    });
+    setSelectedItemCategory("");
+    setSelectedItemName("");
+    setSelectedItemPartner("");
+    setSelectedItemType("");
+  };
+  const handleCategorySubmit = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    categoryCreation.mutate({
+      is_active: selectedCategoryIsActive,
+      is_main: selectedCategoryMaincategory,
+      name: selectedCategoryName,
+      parent_name: selectedCategoryParent,
+      tipus: itemType,
+    });
+    setSelectedCategoryIsActive(true);
+    setSelectedCategoryMaincategory(true);
+    setSelectedCategoryName("");
+    setSelectedCategoryParent("");
+  };
+  const [selectedCategoryIsActive, setSelectedCategoryIsActive] =
+    useState<boolean>(true);
+  const [selectedCategoryParent, setSelectedCategoryParent] =
+    useState<string>("");
+  const [selectedCategoryMaincategory, setSelectedCategoryMaincategory] =
+    useState<boolean>(true);
+  const [selectedCategoryName, setSelectedCategoryName] = useState<string>("");
 
-  const [itemState, setItemState] = useState<{
-    name: string;
-    type: string;
-    partner: string;
-    category: string;
-  }>({ name: "", type: "", partner: "", category: "" });
+  const [selectedConnectionItem, setSelectedConnectionItem] = useState("");
+  const [selectedConnectionSample, setSelectedConnectionSample] = useState("");
+  const [selectedConnectionPartner, setSelectedConnectionPartner] =
+    useState("");
+  const createConnection = trpc.expenses.createConnection.useMutation({
+    async onMutate({ item, itemType, partner, sample }) {
+      await utils.expenses.getConnectionsByType.cancel();
+      const tasks = connections.data ?? [];
+      utils.expenses.getConnectionsByType.setData(
+        [
+          ...tasks,
+          {
+            id: `${Math.random()}`,
+            elemekName: item,
+            minta: sample,
+            partnerekName: partner,
+            tipus: itemType,
+          },
+        ],
+        { type: itemType }
+      );
+    },
+  });
+
+  const submitConnection = (e: any) => {
+    e.preventDefault();
+    createConnection.mutate({
+      item: selectedConnectionItem,
+      itemType: itemType,
+      partner: selectedConnectionPartner,
+      sample: selectedConnectionSample,
+    });
+    const ws = new WebSocket("wss://dataupload.xyz/ws/make_cashflow_planner/");
+    utils.expenses.getAllIncomeExpense;
+    setSelectedConnectionItem("");
+    setSelectedConnectionPartner("");
+    setSelectedConnectionSample("");
+  };
+
+  const createPartner = trpc.expenses.createPartner.useMutation({
+    async onMutate({ name, type }) {
+      await utils.expenses.getPartnersByType.cancel();
+      const tasks = partners.data ?? [];
+      utils.expenses.getPartnersByType.setData(
+        [
+          ...tasks,
+          {
+            id: `${Math.random()}`,
+            name: name,
+            tipus: type,
+          },
+        ],
+        { type: itemType }
+      );
+    },
+  });
+  const [selectedPartnerName, setSelectedPartnerName] = useState("");
+  const submitPartner = (e: any) => {
+    e.preventDefault();
+    createPartner.mutate({
+      name: selectedPartnerName,
+      type: itemType,
+    });
+    setSelectedPartnerName("");
+  };
+
+  const createType = trpc.expenses.createType.useMutation({
+    async onMutate({ name, type }) {
+      await utils.expenses.getTypeByType.cancel();
+      const tasks = types.data ?? [];
+      utils.expenses.getTypeByType.setData(
+        [
+          ...tasks,
+          {
+            name: name,
+            tipus: type,
+          },
+        ],
+        { type: itemType }
+      );
+    },
+  });
+  const [selectedTypeName, setSelectedTypeName] = useState("");
+  const submitType = (e: any) => {
+    e.preventDefault();
+    createType.mutate({
+      name: selectedTypeName,
+      type: itemType,
+    });
+    setSelectedTypeName("");
+  };
+
   useEffect(() => {
     if (types.data && typeof types.data[0] !== "undefined") {
-      setSelected(types.data[0].name);
+      setSelectedItemType(types.data[0].name);
     }
   }, []);
   return (
@@ -64,186 +242,72 @@ export default function Tabs({
             <form className="w-full max-w-lg pt-6">
               <div className="-mx-3 mb-6 flex flex-wrap">
                 <div className="mb-6 w-full px-3 md:mb-0 md:w-1/2">
-                  <div className="w-full px-3 md:w-1/2">
+                  <div className="w-full md:w-1/2">
                     <label
                       className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
                       htmlFor="grid-last-name"
                     >
-                      Típus
+                      Név
                     </label>
                     <input
-                      className="block w-full appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
+                      value={selectedItemName}
+                      className="block appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
+                      style={{ width: 400 }}
                       id="grid-last-name"
                       type="text"
-                      placeholder="Doe"
-                      onChange={(e) =>
-                        setItemState((prev) => ({
-                          ...prev,
-                          type: e.target.value,
-                        }))
-                      }
+                      onChange={(e) => setSelectedItemName(e.target.value)}
                     />
                   </div>
                 </div>
-                <div className="relative top-5">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-last-name"
-                  >
-                    Típus
-                  </label>
-                  <Combobox value={selected} onChange={setSelected}>
-                    <div className="relative mt-1">
-                      <div className="relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
-                        <Combobox.Input
-                          className="focus:outline-none0 block w-full appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white"
-                          displayValue={(person) => person}
-                          onChange={(event) => setQuery(event.target.value)}
-                        />
-                        <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-                          <ChevronUpDownIcon
-                            className="h-5 w-5 text-gray-400"
-                            aria-hidden="true"
-                          />
-                        </Combobox.Button>
-                      </div>
-                      <Transition
-                        as={Fragment}
-                        leave="transition ease-in duration-100"
-                        leaveFrom="opacity-100"
-                        leaveTo="opacity-0"
-                        afterLeave={() => setQuery("")}
-                      >
-                        <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                          {types.data &&
-                          types.data.map((type) => type.name).length === 0 &&
-                          query !== "" ? (
-                            <div className="relative cursor-default select-none py-2 px-4 text-gray-700">
-                              Nothing found.
-                            </div>
-                          ) : (
-                            types.data &&
-                            types.data.map((type) => (
-                              <Combobox.Option
-                                key={type.name}
-                                className={({ active }) =>
-                                  `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                                    active
-                                      ? "bg-gray-700 text-white"
-                                      : "text-gray-900"
-                                  }`
-                                }
-                                value={type.name}
-                              >
-                                {({ selected, active }) => (
-                                  <>
-                                    <span
-                                      className={`block truncate ${
-                                        selected ? "font-medium" : "font-normal"
-                                      }`}
-                                    >
-                                      {type.name}
-                                    </span>
-                                    {selected ? (
-                                      <span
-                                        className={`absolute inset-y-0 left-0 flex items-center pl-3 ${
-                                          active
-                                            ? "text-white"
-                                            : "text-teal-600"
-                                        }`}
-                                      >
-                                        <CheckIcon
-                                          className="h-5 w-5"
-                                          aria-hidden="true"
-                                        />
-                                      </span>
-                                    ) : null}
-                                  </>
-                                )}
-                              </Combobox.Option>
-                            ))
-                          )}
-                        </Combobox.Options>
-                      </Transition>
-                    </div>
-                  </Combobox>
-                </div>
               </div>
-              <div className="-mx-3 mb-6 flex flex-wrap">
-                <div className="w-full px-3">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-password"
-                  >
-                    Password
-                  </label>
-                  <input
-                    className="mb-3 block w-full appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
-                    id="grid-password"
-                    type="password"
-                    placeholder="******************"
-                  />
-                  <p className="text-xs italic text-gray-600">
-                    Make it as long and as crazy as you'd like
-                  </p>
-                </div>
+              <div className="float-right inline-block">
+                <DropdownList
+                  label="Típus"
+                  options={
+                    types.data ? types.data.map((type) => type.name) : [""]
+                  }
+                  selected={selectedItemType}
+                  setSelected={setSelectedItemType}
+                />
               </div>
-              <div className="-mx-3 mb-2 flex flex-wrap">
-                <div className="mb-6 w-full px-3 md:mb-0 md:w-1/3">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-city"
-                  >
-                    City
-                  </label>
-                  <input
-                    className="block w-full appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
-                    id="grid-city"
-                    type="text"
-                    placeholder="Albuquerque"
-                  />
-                </div>
-                <div className="mb-6 w-full px-3 md:mb-0 md:w-1/3">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-state"
-                  >
-                    State
-                  </label>
-                  <div className="relative">
-                    <select
-                      className="block w-full appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 pr-8 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
-                      id="grid-state"
-                    >
-                      <option>New Mexico</option>
-                      <option>Missouri</option>
-                      <option>Texas</option>
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                      <svg
-                        className="h-4 w-4 fill-current"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div className="mb-6 w-full px-3 md:mb-0 md:w-1/3">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-zip"
-                  >
-                    Zip
-                  </label>
-                  <input
-                    className="block w-full appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
-                    id="grid-zip"
-                    type="text"
-                    placeholder="90210"
-                  />
-                </div>
+              <div className="float-left inline-block">
+                <DropdownList
+                  label="Partner"
+                  options={
+                    partners.data
+                      ? partners.data.map((partner) => partner.name)
+                      : [""]
+                  }
+                  selected={selectedItemPartner}
+                  setSelected={setSelectedItemPartner}
+                />
+              </div>
+              <div style={{ width: 400 }} className="mt-8 inline-block">
+                <DropdownList
+                  label="Kategória"
+                  options={
+                    categories.data
+                      ? categories.data.map((category) => category.name)
+                      : [""]
+                  }
+                  selected={selectedItemCategory}
+                  setSelected={setSelectedItemCategory}
+                />
+              </div>
+              <div className="relative top-12">
+                <SubmitButton onClick={handleItemSubmit} title="Hozzáadás" />
+              </div>
+              <div className="relative top-2 left-72 ml-1">
+                <DeleteButton
+                  title="Törlés"
+                  onClick={(e: any) => {
+                    e.preventDefault();
+                    setSelectedItemCategory("");
+                    setSelectedItemName("");
+                    setSelectedItemPartner("");
+                    setSelectedItemType("");
+                  }}
+                />
               </div>
             </form>
           </Tab.Panel>
@@ -254,114 +318,87 @@ export default function Tabs({
             )}
           >
             <form className="w-full max-w-lg pt-6">
-              <div className="-mx-3 mb-6 flex flex-wrap">
-                <div className="mb-6 w-full px-3 md:mb-0 md:w-1/2">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-first-name"
-                  >
-                    First Name
-                  </label>
-                  <input
-                    className="mb-3 block w-full appearance-none rounded border border-red-500 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:bg-white focus:outline-none"
-                    id="grid-first-name"
-                    type="text"
-                    placeholder="Jane"
-                  />
-                  <p className="text-xs italic text-red-500">
-                    Please fill out this field.
-                  </p>
-                </div>
-                <div className="w-full px-3 md:w-1/2">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-last-name"
-                  >
-                    Last Name
-                  </label>
-                  <input
-                    className="block w-full appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
-                    id="grid-last-name"
-                    type="text"
-                    placeholder="Doe"
-                  />
-                </div>
+              <div className="mb-5 flex flex-row py-2">
+                <label
+                  className="basis-4/5 text-xs font-bold uppercase tracking-wide text-gray-700"
+                  htmlFor="grid-last-name"
+                >
+                  Főkategória?
+                </label>
+                <SwitchButton
+                  enabled={selectedCategoryMaincategory}
+                  setEnabled={setSelectedCategoryMaincategory}
+                />
               </div>
-              <div className="-mx-3 mb-6 flex flex-wrap">
-                <div className="w-full px-3">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-password"
-                  >
-                    Password
-                  </label>
-                  <input
-                    className="mb-3 block w-full appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
-                    id="grid-password"
-                    type="password"
-                    placeholder="******************"
-                  />
-                  <p className="text-xs italic text-gray-600">
-                    Make it as long and as crazy as you'd like
-                  </p>
-                </div>
-              </div>
-              <div className="-mx-3 mb-2 flex flex-wrap">
-                <div className="mb-6 w-full px-3 md:mb-0 md:w-1/3">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-city"
-                  >
-                    City
-                  </label>
-                  <input
-                    className="block w-full appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
-                    id="grid-city"
-                    type="text"
-                    placeholder="Albuquerque"
-                  />
-                </div>
-                <div className="mb-6 w-full px-3 md:mb-0 md:w-1/3">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-state"
-                  >
-                    State
-                  </label>
-                  <div className="relative">
-                    <select
-                      className="block w-full appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 pr-8 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
-                      id="grid-state"
-                    >
-                      <option>New Mexico</option>
-                      <option>Missouri</option>
-                      <option>Texas</option>
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                      <svg
-                        className="h-4 w-4 fill-current"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
+              <div className="flex flex-row">
+                <div className="-mx-3 flex flex-row flex-wrap pr-1">
+                  <div className="mb-6 px-3 md:mb-0 md:w-1/2">
+                    <div className="md:w-1/2">
+                      <label
+                        className="block pb-2 text-xs font-bold uppercase tracking-wide text-gray-700"
+                        htmlFor="grid-last-name"
                       >
-                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                      </svg>
+                        Név
+                      </label>
+                      <input
+                        value={selectedCategoryName}
+                        className="appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
+                        style={{
+                          width: selectedCategoryMaincategory ? 400 : 200,
+                        }}
+                        id="grid-last-name"
+                        type="text"
+                        onChange={(e) =>
+                          setSelectedCategoryName(e.target.value)
+                        }
+                      />
                     </div>
                   </div>
                 </div>
-                <div className="mb-6 w-full px-3 md:mb-0 md:w-1/3">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-zip"
-                  >
-                    Zip
-                  </label>
-                  <input
-                    className="block w-full appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
-                    id="grid-zip"
-                    type="text"
-                    placeholder="90210"
-                  />
-                </div>
+                {!selectedCategoryMaincategory && (
+                  <div style={{ width: 200 }} className="inline-block pl-1">
+                    <DropdownList
+                      label="Szülő"
+                      options={
+                        categories.data
+                          ? categories.data.map((category) => category.name)
+                          : [""]
+                      }
+                      selected={selectedCategoryParent}
+                      setSelected={setSelectedCategoryParent}
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="mb-5 mt-8 flex flex-row py-2">
+                <label
+                  className="basis-4/5 text-xs font-bold uppercase tracking-wide text-gray-700"
+                  htmlFor="grid-last-name"
+                >
+                  Aktív?
+                </label>
+                <SwitchButton
+                  enabled={selectedCategoryIsActive}
+                  setEnabled={setSelectedCategoryIsActive}
+                />
+              </div>
+              <div className="relative top-12">
+                <SubmitButton
+                  onClick={handleCategorySubmit}
+                  title="Hozzáadás"
+                />
+              </div>
+              <div className="relative top-2 left-72 ml-1">
+                <DeleteButton
+                  title="Törlés"
+                  onClick={(e: any) => {
+                    e.preventDefault();
+                    setSelectedCategoryName("");
+                    setSelectedCategoryParent("");
+                    setSelectedCategoryMaincategory(true);
+                    setSelectedCategoryIsActive(true);
+                  }}
+                />
               </div>
             </form>
           </Tab.Panel>
@@ -372,114 +409,108 @@ export default function Tabs({
             )}
           >
             <form className="w-full max-w-lg pt-6">
-              <div className="-mx-3 mb-6 flex flex-wrap">
-                <div className="mb-6 w-full px-3 md:mb-0 md:w-1/2">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-first-name"
-                  >
-                    First Name
-                  </label>
-                  <input
-                    className="mb-3 block w-full appearance-none rounded border border-red-500 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:bg-white focus:outline-none"
-                    id="grid-first-name"
-                    type="text"
-                    placeholder="Jane"
-                  />
-                  <p className="text-xs italic text-red-500">
-                    Please fill out this field.
-                  </p>
-                </div>
-                <div className="w-full px-3 md:w-1/2">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-last-name"
-                  >
-                    Last Name
-                  </label>
-                  <input
-                    className="block w-full appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
-                    id="grid-last-name"
-                    type="text"
-                    placeholder="Doe"
-                  />
-                </div>
+              <div>
+                <DropdownList
+                  label="Partner"
+                  options={
+                    partners.data
+                      ? partners.data.map((partner) => partner.name)
+                      : [""]
+                  }
+                  selected={selectedConnectionPartner}
+                  setSelected={setSelectedConnectionPartner}
+                />
               </div>
-              <div className="-mx-3 mb-6 flex flex-wrap">
-                <div className="w-full px-3">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-password"
-                  >
-                    Password
-                  </label>
-                  <input
-                    className="mb-3 block w-full appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
-                    id="grid-password"
-                    type="password"
-                    placeholder="******************"
-                  />
-                  <p className="text-xs italic text-gray-600">
-                    Make it as long and as crazy as you'd like
-                  </p>
-                </div>
+              <div className="mt-6">
+                <FormField
+                  setSelected={setSelectedConnectionSample}
+                  selected={selectedConnectionSample}
+                  label="Minta"
+                />
               </div>
-              <div className="-mx-3 mb-2 flex flex-wrap">
-                <div className="mb-6 w-full px-3 md:mb-0 md:w-1/3">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-city"
-                  >
-                    City
-                  </label>
-                  <input
-                    className="block w-full appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
-                    id="grid-city"
-                    type="text"
-                    placeholder="Albuquerque"
-                  />
-                </div>
-                <div className="mb-6 w-full px-3 md:mb-0 md:w-1/3">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-state"
-                  >
-                    State
-                  </label>
-                  <div className="relative">
-                    <select
-                      className="block w-full appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 pr-8 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
-                      id="grid-state"
-                    >
-                      <option>New Mexico</option>
-                      <option>Missouri</option>
-                      <option>Texas</option>
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                      <svg
-                        className="h-4 w-4 fill-current"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
-                      </svg>
-                    </div>
+              <div ref={animateParent}>
+                {selectedConnectionPartner && (
+                  <div className="mt-6">
+                    <DropdownList
+                      label="Elem"
+                      options={items.data
+                        ?.filter(
+                          (item: any) =>
+                            item.partnerName === selectedConnectionPartner
+                        )
+                        .map((item: any) => item.name)}
+                      selected={selectedConnectionItem}
+                      setSelected={setSelectedConnectionItem}
+                    />
                   </div>
-                </div>
-                <div className="mb-6 w-full px-3 md:mb-0 md:w-1/3">
-                  <label
-                    className="mb-2 block text-xs font-bold uppercase tracking-wide text-gray-700"
-                    htmlFor="grid-zip"
-                  >
-                    Zip
-                  </label>
-                  <input
-                    className="block w-full appearance-none rounded border border-gray-200 bg-gray-200 py-3 px-4 leading-tight text-gray-700 focus:border-gray-500 focus:bg-white focus:outline-none"
-                    id="grid-zip"
-                    type="text"
-                    placeholder="90210"
-                  />
-                </div>
+                )}
+              </div>
+              <div className="relative top-12">
+                <SubmitButton onClick={submitConnection} />
+              </div>
+              <div className="relative top-2 left-72 ml-1">
+                <DeleteButton
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setSelectedConnectionItem("");
+                    setSelectedConnectionPartner("");
+                    setSelectedConnectionSample("");
+                  }}
+                />
+              </div>
+            </form>
+          </Tab.Panel>
+          <Tab.Panel
+            className={classNames(
+              "rounded-xl bg-white p-3",
+              "ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2"
+            )}
+          >
+            <form className="w-full max-w-lg pt-6">
+              <div>
+                <FormField
+                  label="Partner"
+                  selected={selectedPartnerName}
+                  setSelected={setSelectedPartnerName}
+                />
+              </div>
+              <div className="relative top-12">
+                <SubmitButton onClick={submitPartner} />
+              </div>
+              <div className="relative top-2 left-72 ml-1">
+                <DeleteButton
+                  onClick={(e: any) => {
+                    e.preventDefault();
+                    setSelectedPartnerName("");
+                  }}
+                />
+              </div>
+            </form>
+          </Tab.Panel>
+          <Tab.Panel
+            className={classNames(
+              "rounded-xl bg-white p-3",
+              "ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2"
+            )}
+          >
+            <form className="w-full max-w-lg pt-6">
+              <div>
+                <FormField
+                  label="Típus"
+                  selected={selectedTypeName}
+                  setSelected={setSelectedTypeName}
+                />
+              </div>
+              <div className="relative top-12">
+                <SubmitButton onClick={submitType} />
+              </div>
+              <div className="relative top-2 left-72 ml-1">
+                <DeleteButton
+                  onClick={(e: any) => {
+                    e.preventDefault();
+                    setSelectedTypeName("");
+                  }}
+                />
               </div>
             </form>
           </Tab.Panel>

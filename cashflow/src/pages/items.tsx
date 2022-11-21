@@ -37,50 +37,25 @@ export default function Datas() {
     ? itemType.substring(0, itemType.length - 2)
     : "";
 
-  const mainColumns: GridColDef[] = [
-    {
-      field: "Konyveles_datuma",
-      headerName: "Dátum",
-      width: 150,
-    },
+  const typeColumns: GridColDef[] = [
     {
       field: "name",
-      headerName: "Tétel",
-      width: 130,
-    },
-    {
-      field: "type",
       headerName: "Típus",
-      width: 130,
+      width: 420,
     },
+  ];
+  const partnerColumns: GridColDef[] = [
     {
-      field: "kategory",
-      headerName: "Kategória",
-      width: 130,
-    },
-    {
-      field: "Osszeg",
-      headerName: itemType ? itemType : "Összeg",
-      headerClassName: "font-bold",
-      valueFormatter: valueFormatter,
-    },
-    {
-      field: "vallet",
-      headerName: "Pénztárca",
-      headerClassName: "font-bold",
-      width: 90,
-    },
-    {
-      field: "Partner_elnevezese",
+      field: "name",
       headerName: "Partner",
-      width: 150,
+      width: 420,
     },
   ];
   const categoryColumns: GridColDef[] = [
     {
       field: "name",
-      headerName: `${singularItemType}-Kategória`,
-      width: 150,
+      headerName: `Kategória`,
+      width: 208,
     },
     {
       field: "is_main",
@@ -103,12 +78,12 @@ export default function Datas() {
   const itemColumns: GridColDef[] = [
     {
       field: "name",
-      headerName: `${singularItemType}-tétel`,
+      headerName: `Tétel`,
       width: 180,
     },
     {
       field: "type",
-      headerName: `${singularItemType}-típus`,
+      headerName: `Típus`,
       width: 150,
     },
     {
@@ -139,29 +114,28 @@ export default function Datas() {
       width: 150,
     },
   ];
-  const expenses = trpc.expenses.getAll.useQuery();
-  const tabs = ["tétel", "kategória", "kapcsolat"];
-  const mainData = expenses.data?.filter((data) => {
-    if (itemType === "Bevételek") {
-      return data.Osszeg ? data.Osszeg > 0 : false;
-    } else if (itemType === "Költségek") {
-      return data.Osszeg ? data.Osszeg < 0 : false;
-    }
-    return false;
-  });
+  const tabs = ["Tétel", "Kategória", "Kapcsolat", "Partnerek", "Típusok"];
   const categories = trpc.expenses.getCategoriesByType.useQuery({
     type: singularItemType.toLowerCase(),
   });
-  const items = trpc.expenses.getItemByType.useQuery({
+  const items = trpc.expenses.getItemByType.useQuery(
+    {
+      type: singularItemType.toLowerCase(),
+    },
+    { staleTime: 3000 }
+  );
+  const types = trpc.expenses.getTypeByType.useQuery({
     type: singularItemType.toLowerCase(),
   });
   const connections = trpc.expenses.getConnectionsByType.useQuery({
     type: singularItemType.toLowerCase(),
   });
+  const partners = trpc.expenses.getPartnersByType.useQuery({
+    type: singularItemType.toLowerCase(),
+  });
   React.useEffect(() => {
     setItemType(window.sessionStorage.getItem("itemType"));
   }, []);
-
   return (
     <div>
       <Navbar currentPage="Adatok" />
@@ -181,30 +155,43 @@ export default function Datas() {
         plans={["Bevételek", "Költségek"]}
         itemState={itemType ? itemType : ""}
       />
-      <div className="absolute top-64 left-4 bottom-4 mx-auto mt-4 w-full max-w-md rounded-md bg-white py-8 px-3">
+      <div className="absolute top-64 left-4 bottom-2 mx-auto mt-4 w-full max-w-md rounded-md bg-white py-8 px-3">
         <Tabs
           itemType={singularItemType.toLowerCase()}
-          tabNames={tabs.map((t) => `${singularItemType}-${t}`)}
+          items={items}
+          tabNames={tabs.map((t) => t)}
         />
       </div>
       <div
-        className="absolute bottom-4 left-96 z-10 m-auto ml-24 flex rounded-md bg-white opacity-90"
+        className="absolute bottom-2 left-96 z-10 m-auto ml-24 flex rounded-md bg-white opacity-90"
         style={{ height: 815 / 2, width: "26.5%" }}
       >
         <DataGrid
           columns={connectionColumns}
           rows={connections.data ? connections.data : []}
-          sx={{ fontWeight: 400, border: "2px solid #265470" }}
+          sx={{ fontWeight: 400 }}
         />
       </div>
       <div
-        className="absolute right-4 bottom-4 z-10 m-auto flex rounded-md bg-white opacity-90"
-        style={{ height: 815 / 2, width: "47%" }}
+        className="absolute right-4 bottom-2 z-10 m-auto flex rounded-md bg-white opacity-90"
+        style={{ height: 815 / 2, width: "23.25%" }}
       >
         <DataGrid
-          columns={mainColumns}
-          rows={mainData ? mainData : []}
-          sx={{ fontWeight: 400, border: "2px solid #265470" }}
+          columns={typeColumns}
+          rows={types.data ? types.data : []}
+          sx={{ fontWeight: 400 }}
+          getRowId={(row) => row.name}
+        />
+      </div>
+      <div
+        className="absolute right-96 bottom-2 z-10 m-auto flex rounded-md bg-white opacity-90"
+        style={{ height: 815 / 2, width: "23.25%", marginRight: 90 }}
+      >
+        <DataGrid
+          columns={partnerColumns}
+          rows={partners.data ? partners.data : []}
+          getRowId={(row) => row.name}
+          sx={{ fontWeight: 400 }}
         />
       </div>
       <div
@@ -215,18 +202,18 @@ export default function Datas() {
           columns={itemColumns}
           getRowId={(row) => row.name}
           rows={items.data ? items.data : []}
-          sx={{ fontWeight: 400, border: "2px solid #265470" }}
+          sx={{ fontWeight: 400 }}
         />
       </div>
       <div
         className="relative z-10 m-auto flex rounded-md bg-white opacity-90"
-        style={{ height: 815 / 2, width: "37%", right: 120, bottom: 115 }}
+        style={{ height: 815 / 2, width: "37%", right: 125, bottom: 115 }}
       >
         <DataGrid
           columns={categoryColumns}
           getRowId={(row) => row.name}
           rows={categories.data ? categories.data : []}
-          sx={{ fontWeight: 400, border: "2px solid #265470" }}
+          sx={{ fontWeight: 400 }}
         />
       </div>
     </div>
