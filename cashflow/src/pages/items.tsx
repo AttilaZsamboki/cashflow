@@ -7,7 +7,7 @@ import { Dialog, Group, useMantineTheme, Text, Modal } from "@mantine/core";
 import Navbar from "../components/Navbar";
 import SideBar from "../components/SideBar";
 import Radio from "../components/Radio";
-import { DataGrid, GridValueFormatterParams } from "@mui/x-data-grid";
+import { DataGrid, huHU, GridValueFormatterParams } from "@mui/x-data-grid";
 import { trpc } from "../utils/trpc";
 import { GridColDef } from "@mui/x-data-grid";
 import Tabs from "../components/Tabs";
@@ -221,17 +221,27 @@ export default function Datas() {
     },
   });
   const deleteAll = () => {
-    itemSelectionModel.map((item) => deleteItem.mutate({ id: item }));
-    categorySelectionModel.map((category) =>
-      deleteCategory.mutate({ id: category })
-    );
-    connectionSelectionModel.map((connection) =>
-      deleteConnection.mutate({ id: connection })
-    );
-    partnerSelectionModel.map((partner) =>
-      deletePartner.mutate({ id: partner })
-    );
-    typeSelectionModel.map((type) => deleteType.mutate({ id: type }));
+    if (checkItemDelete) {
+      itemSelectionModel.map((item) => deleteItem.mutate({ id: item }));
+    }
+    if (checkCategoryDelete) {
+      categorySelectionModel.map((category) =>
+        deleteCategory.mutate({ id: category })
+      );
+    }
+    if (checkConnectionDelete) {
+      connectionSelectionModel.map((connection) =>
+        deleteConnection.mutate({ id: connection })
+      );
+    }
+    if (checkPartnerDelete) {
+      partnerSelectionModel.map((partner) =>
+        deletePartner.mutate({ id: partner })
+      );
+    }
+    if (checkTypeDelete) {
+      typeSelectionModel.map((type) => deleteType.mutate({ id: type }));
+    }
   };
   const categoryDetails = categories.data?.find(
     (category) => category.id === categorySelectionModel[0]
@@ -480,6 +490,12 @@ export default function Datas() {
     }
     setOpened(false);
   };
+  const [checkItemDelete, setCheckItemDelete] = React.useState(true);
+  const [checkCategoryDelete, setCheckCategoryDelete] = React.useState(true);
+  const [checkConnectionDelete, setCheckConnectionDelete] =
+    React.useState(true);
+  const [checkPartnerDelete, setCheckPartnerDelete] = React.useState(true);
+  const [checkTypeDelete, setCheckTypeDelete] = React.useState(true);
   return (
     <div>
       <Navbar currentPage="Adatok" />
@@ -503,20 +519,32 @@ export default function Datas() {
         size="xl"
         radius="md"
       >
-        <div className="flex">
+        <div className="flex ">
           <div className="mt-2 grow">
-            <Text size="sm" style={{ marginBottom: 10 }} weight={500}>
+            <Text size="md" style={{ marginBottom: 10 }} weight={500}>
               <p className="float-left mr-1 inline-block font-bold">
-                {itemSelectionModel.length +
-                  categorySelectionModel.length +
-                  connectionSelectionModel.length +
-                  partnerSelectionModel.length +
-                  typeSelectionModel.length}
+                {(checkItemDelete ? itemSelectionModel.length : 0) +
+                  (checkCategoryDelete ? categorySelectionModel.length : 0) +
+                  (checkConnectionDelete
+                    ? connectionSelectionModel.length
+                    : 0) +
+                  (checkPartnerDelete ? partnerSelectionModel.length : 0) +
+                  (checkTypeDelete ? typeSelectionModel.length : 0)}
               </p>
               elem törlése
             </Text>
             {expandedDeleteDialog && (
-              <>
+              <div className="border-t-2 border-gray-400">
+                <Text
+                  size="sm"
+                  style={{ marginBottom: 10, marginTop: 8 }}
+                  weight={400}
+                >
+                  Elem:
+                  <p className="float-right inline-block font-bold">
+                    {itemSelectionModel.length}
+                  </p>
+                </Text>
                 <Text size="sm" style={{ marginBottom: 10 }} weight={400}>
                   Kategória:{" "}
                   <p className="float-right inline-block font-bold">
@@ -541,13 +569,7 @@ export default function Datas() {
                     {typeSelectionModel.length}
                   </p>
                 </Text>
-                <Text size="sm" style={{ marginBottom: 10 }} weight={400}>
-                  Elem:
-                  <p className="float-right inline-block font-bold">
-                    {itemSelectionModel.length}
-                  </p>
-                </Text>
-              </>
+              </div>
             )}
           </div>
           <div className="relative top-2 grow">
@@ -565,16 +587,85 @@ export default function Datas() {
               />
             )}
           </div>
-          <button
-            onClick={deleteAll}
-            className="h-9 rounded bg-red-700 py-2 px-4 align-middle font-bold text-white hover:bg-red-600"
-          >
-            <TrashIcon
-              width={20}
-              height={20}
-              className="float-left inline-block"
-            />
-          </button>
+          <div>
+            <button
+              onClick={deleteAll}
+              className="h-9 rounded bg-red-700 py-2 px-4 align-middle font-bold text-white hover:bg-red-600"
+            >
+              <TrashIcon
+                width={20}
+                height={20}
+                className="float-left inline-block"
+              />
+            </button>
+            {expandedDeleteDialog && (
+              <div className="mb-4 mt-4 flex flex-col items-center gap-3">
+                <div className="form-check">
+                  <input
+                    className="form-check-input float-left mt-1 mr-2 h-4 w-4 cursor-pointer appearance-none rounded-sm border border-gray-300 bg-white bg-contain bg-center bg-no-repeat align-top transition duration-200 checked:border-red-600 checked:bg-red-600 focus:outline-none"
+                    type="checkbox"
+                    checked={checkItemDelete}
+                    onChange={() =>
+                      setCheckItemDelete(checkItemDelete ? false : true)
+                    }
+                    value=""
+                    id="flexCheckDefault"
+                  />
+                </div>
+                <div className="form-check">
+                  <input
+                    className="form-check-input float-left mt-1 mr-2 h-4 w-4 cursor-pointer appearance-none rounded-sm border border-gray-300 bg-white bg-contain bg-center bg-no-repeat align-top transition duration-200 checked:border-red-600 checked:bg-red-600 focus:outline-none"
+                    type="checkbox"
+                    value=""
+                    checked={checkCategoryDelete}
+                    onChange={() =>
+                      setCheckCategoryDelete(checkCategoryDelete ? false : true)
+                    }
+                    id="flexCheckDefault"
+                  />
+                </div>
+                <div className="form-check">
+                  <input
+                    className="form-check-input float-left mt-1 mr-2 h-4 w-4 cursor-pointer appearance-none rounded-sm border border-gray-300 bg-white bg-contain bg-center bg-no-repeat align-top transition duration-200 checked:border-red-600 checked:bg-red-600 focus:outline-none"
+                    type="checkbox"
+                    value=""
+                    id="flexCheckDefault"
+                    checked={checkConnectionDelete}
+                    onChange={() =>
+                      setCheckConnectionDelete(
+                        checkConnectionDelete ? false : true
+                      )
+                    }
+                  />
+                </div>
+                <div className="form-check">
+                  <input
+                    className="form-check-input float-left mt-1 mr-2 h-4 w-4 cursor-pointer appearance-none rounded-sm border border-gray-300 bg-white bg-contain bg-center bg-no-repeat align-top transition duration-200 checked:border-red-600 checked:bg-red-600 focus:outline-none"
+                    type="checkbox"
+                    value=""
+                    id="flexCheckDefault"
+                    checked={checkPartnerDelete}
+                    onChange={() =>
+                      setCheckConnectionDelete(
+                        checkConnectionDelete ? false : true
+                      )
+                    }
+                  />
+                </div>
+                <div className="form-check">
+                  <input
+                    className="form-check-input float-left mt-1 mr-2 h-4 w-4 cursor-pointer appearance-none rounded-sm border border-gray-300 bg-white bg-contain bg-center bg-no-repeat align-top transition duration-200 checked:border-red-600 checked:bg-red-600 focus:outline-none"
+                    type="checkbox"
+                    checked={checkTypeDelete}
+                    onChange={() =>
+                      setCheckTypeDelete(checkTypeDelete ? false : true)
+                    }
+                    id="flexCheckDefault"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </Dialog>
       <Dialog
@@ -605,7 +696,7 @@ export default function Datas() {
       >
         <div className="flex">
           <div className="mt-2 grow">
-            <Text size="sm" style={{ marginBottom: 10 }} weight={500}>
+            <Text size="md" style={{ marginBottom: 10 }} weight={500}>
               <p className="float-left mr-1 inline-block font-bold">
                 {itemSelectionModel.length
                   ? itemDetails
@@ -998,6 +1089,7 @@ export default function Datas() {
           columns={connectionColumns}
           rows={connections.data ? connections.data : []}
           sx={{ fontWeight: 400 }}
+          localeText={huHU.components.MuiDataGrid.defaultProps.localeText}
           onSelectionModelChange={(ids) => {
             setConnectionSelectionModel(ids as string[]);
           }}
@@ -1008,6 +1100,7 @@ export default function Datas() {
         style={{ height: 815 / 2, width: "23.25%" }}
       >
         <DataGrid
+          localeText={huHU.components.MuiDataGrid.defaultProps.localeText}
           checkboxSelection={true}
           columns={typeColumns}
           rows={types.data ? types.data : []}
@@ -1023,6 +1116,7 @@ export default function Datas() {
         style={{ height: 815 / 2, width: "23.25%", marginRight: 90 }}
       >
         <DataGrid
+          localeText={huHU.components.MuiDataGrid.defaultProps.localeText}
           checkboxSelection={true}
           columns={partnerColumns}
           rows={partners.data ? partners.data : []}
@@ -1038,6 +1132,7 @@ export default function Datas() {
         style={{ height: 815 / 2, width: "36.5%" }}
       >
         <DataGrid
+          localeText={huHU.components.MuiDataGrid.defaultProps.localeText}
           checkboxSelection={true}
           columns={itemColumns}
           getRowId={(row) => row.id}
@@ -1053,6 +1148,7 @@ export default function Datas() {
         style={{ height: 815 / 2, width: "37%", right: 125, bottom: 115 }}
       >
         <DataGrid
+          localeText={huHU.components.MuiDataGrid.defaultProps.localeText}
           checkboxSelection={true}
           columns={categoryColumns}
           rows={categories.data ? categories.data : []}
