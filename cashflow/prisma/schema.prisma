@@ -18,37 +18,41 @@ model kategoriak {
 }
 
 model tipusok {
-  name  String @id
+  id    String @id @default(cuid())
+  name  String
   tipus String
 }
 
 model elemek {
-  name             String             @id(map: "Koltsegelemek_pkey")
+  name             String
   type             String?
   partnerName      String?
-  partner          Partnerek?         @relation(fields: [partnerName], references: [name], map: "Koltsegelemek_partnerId_fkey")
   kategoriakName   String?
-  kategoriak       kategoriak?        @relation(fields: [kategoriakName], references: [name])
   elem_tipus       String
+  id               String             @unique @default(cuid())
+  partner          Partnerek?         @relation(fields: [partnerName], references: [name], map: "Koltsegelemek_partnerId_fkey")
+  kategoriak       kategoriak?        @relation(fields: [kategoriakName], references: [name])
   elem_kapcsolatok elem_kapcsolatok[]
+
+  @@id([name, elem_tipus])
 }
 
 model Partnerek {
   id                     String             @id @default(cuid())
   name                   String             @unique
+  tipus                  String             @default("költség")
   KoltsegelemKapcsolatok elem_kapcsolatok[]
   Koltsegtetelek         elemek[]
-  tipus                  String             @default("költség")
 }
 
 model elem_kapcsolatok {
   id            String    @id(map: "KoltsegelemKapcsolatok_pkey") @default(cuid())
   minta         String
-  elem          elemek    @relation(fields: [elemekName], references: [name])
   partnerekName String
-  partner       Partnerek @relation(fields: [partnerekName], references: [name], map: "KoltsegelemKapcsolatok_partnerekId_fkey")
   tipus         String
-  elemekName    String
+  elemekId      String
+  partner       Partnerek @relation(fields: [partnerekName], references: [name], map: "KoltsegelemKapcsolatok_partnerekId_fkey")
+  elem          elemek    @relation(fields: [elemekId], references: [id])
 }
 
 model Penztarcak {
@@ -159,7 +163,7 @@ model dataupload_tableoverview {
 
 model dataupload_tabletemplates {
   id                  BigInt  @id(map: "datastudio_tabletemplates_pkey") @default(autoincrement())
-  table               String  @db.VarChar(30)
+  table               String  @unique @db.VarChar(30)
   pkey_col            String? @db.VarChar(30)
   skiprows            String  @db.VarChar(10)
   append              String  @db.VarChar(255)
@@ -390,6 +394,8 @@ model fol_orders {
   Completed_Date                DateTime? @db.Date
   id                            Int       @default(autoincrement())
   Paid_At                       DateTime? @db.Timestamp(6)
+  Cancelled_At                  DateTime? @db.Timestamp(6)
+  Cancel_Reason                 String?
 
   @@ignore
 }
@@ -453,18 +459,31 @@ model fol_stock_aging {
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
 model fol_stock_report {
-  id                    BigInt?
-  name                  String?
-  sku                   String?
-  on_stock              BigInt?
-  layers_warehouse      String?
-  on_stock_layer        Float?
-  net_price             Float?
-  landed_cost_layer     Float?
-  inventory_value_layer Float?
-  date                  DateTime? @db.Date
-  sales                 BigInt?
-  timestamp             DateTime? @db.Date
+  id                       BigInt?
+  name                     String?
+  sku                      String?
+  on_stock                 BigInt?
+  layers_warehouse         String?
+  on_stock_layer           Float?
+  net_price                Float?
+  landed_cost_layer        Float?
+  inventory_value_layer    Float?
+  date                     DateTime? @db.Date
+  sales                    BigInt?
+  timestamp                DateTime? @db.Date
+  days_of_stock            Int?
+  ending_inventory_cost    Float?
+  beginning_inventory_cost Float?
+  sales_velocity           Float?
+  lead_time                Float?
+  stockturn                Float?
+  on_stock_days            Float?
+  beginning_inventory      Float?
+  ending_inventory         Float?
+  stockturn_in_days        Float?
+  average_inventory_cost   Float?
+  average_inventory        Float?
+  cogs                     Float?
 
   @@ignore
 }
@@ -903,6 +922,89 @@ model tmd_processed_orders {
   id       Int     @default(autoincrement())
   order_id String? @db.VarChar(100)
   status   String?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model forg_sisebess_g__sszes_t_s {
+  index          BigInt?
+  stat_start     DateTime? @db.Date
+  stat_end       DateTime? @db.Date
+  sku            String?
+  cogs           Float?
+  sales          Float?
+  avg_inv_cost   Float?
+  in_stock_days  Float?
+  stockturn_ip   Float?
+  fsn_nap        Float?
+  fsf_fordulat   Float?
+  sales_velocity Float?
+  lead_time      Float?
+  days_of_stock  Float?
+  on_stock       Float?
+
+  @@index([index], map: "ix_forgásisebesség_összesítés_index")
+  @@map("forgásisebesség_összesítés")
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model pro_activison {
+  start_date DateTime? @db.Timestamp(6)
+  end_date   DateTime? @db.Timestamp(6)
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model pro_activison_per_agent {
+  agent_id   String?   @db.VarChar(100)
+  start_date DateTime? @db.Timestamp(6)
+  status     String?   @db.VarChar(50)
+  end_date   DateTime? @db.Timestamp(6)
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model pro_belepteto {
+  index       BigInt?
+  id          BigInt?
+  userId      BigInt?
+  code        String?
+  jobId       BigInt?
+  startDate   DateTime? @db.Timestamp(6)
+  endDate     DateTime? @db.Timestamp(6)
+  elapsedTime Float?
+  comment     String?
+  photoId     BigInt?
+
+  @@index([index], map: "ix_pro_belepteto_index")
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model profi_stock_transaction_report {
+  Operation_identifier   String?
+  Product                String?
+  Warehouse              String?
+  Operation_item_status  String?
+  Operation_direction    String?
+  Quantity               BigInt?
+  Done_quantity          BigInt?
+  Before_quantity        Float?
+  After_quantity         Float?
+  Reason                 String?
+  Item_notes             String?
+  Related_identifier     String?
+  Assigned_user          String?
+  Created                DateTime? @db.Timestamp(6)
+  Finished               DateTime? @db.Timestamp(6)
+  Cancelled              DateTime? @db.Timestamp(6)
+  Cancelled_by           String?
+  Shipment_supplier_name String?
+  Is_dynamic             String?
 
   @@ignore
 }

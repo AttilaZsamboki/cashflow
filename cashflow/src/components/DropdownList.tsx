@@ -8,7 +8,7 @@ const DropdownList = ({
   options,
   label,
 }: {
-  selected: string;
+  selected: string | undefined;
   setSelected: React.Dispatch<string>;
   options: string[];
   label: string;

@@ -7,6 +7,7 @@ import DeleteButton from "./DeleteButton";
 import SwitchButton from "./Switch";
 import FormField from "./FormField";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import axios from "axios";
 
 function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
@@ -39,48 +40,44 @@ export default function Tabs({
     async onMutate({ name, category, elem_tipus, partner, type }) {
       await utils.expenses.getItemByType.cancel();
       const tasks = items.data ?? [];
-      utils.expenses.getItemByType.setData(
-        [
-          ...tasks,
-          {
-            name: name,
-            elem_tipus: elem_tipus,
-            kategoriakName: category,
-            partnerName: partner,
-            type: type,
-          },
-        ],
-        { type: itemType }
-      );
+      utils.expenses.getItemByType.setData({ type: itemType }, [
+        ...tasks,
+        {
+          name: name,
+          elem_tipus: elem_tipus,
+          kategoriakName: category,
+          partnerName: partner,
+          type: type,
+          id: `${Math.floor(Math.random())}`,
+        },
+      ]);
     },
   });
   const categoryCreation = trpc.expenses.createCategory.useMutation({
     async onMutate({ is_main, name, parent_name, tipus, is_active }) {
       await utils.expenses.getCategoriesByType.cancel();
       const tasks = categories.data ?? [];
-      utils.expenses.getCategoriesByType.setData(
-        [
-          ...tasks,
-          {
-            is_main: is_main,
-            name: name,
-            parent_name: parent_name,
-            tipus: tipus,
-            is_active: is_active,
-            id: `${Math.random()}`,
-          },
-        ],
-        { type: itemType }
-      );
+      utils.expenses.getCategoriesByType.setData({ type: itemType }, [
+        ...tasks,
+        {
+          is_main: is_main,
+          name: name,
+          parent_name: parent_name,
+          tipus: tipus,
+          is_active: is_active,
+          id: `${Math.random()}`,
+        },
+      ]);
     },
   });
   const [selectedItemType, setSelectedItemType] = useState<string>("");
   const [selectedItemPartner, setSelectedItemPartner] = useState<string>("");
   const [selectedItemCategory, setSelectedItemCategory] = useState<string>("");
   const [selectedItemName, setSelectedItemName] = useState<string>("");
-  const handleItemSubmit = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleItemSubmit = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     itemCreation.mutate({
+      id: `${Math.random()}`,
       name: selectedItemName,
       elem_tipus: itemType,
       category: selectedItemCategory,
@@ -91,6 +88,9 @@ export default function Tabs({
     setSelectedItemName("");
     setSelectedItemPartner("");
     setSelectedItemType("");
+    setTimeout(() => {
+      axios.post("https://www.dataupload.xyz/api/create-cashflow-planner/");
+    }, 3000);
   };
   const handleCategorySubmit = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -119,34 +119,32 @@ export default function Tabs({
   const [selectedConnectionPartner, setSelectedConnectionPartner] =
     useState("");
   const createConnection = trpc.expenses.createConnection.useMutation({
-    async onMutate({ item, itemType, partner, sample }) {
+    async onMutate({ itemId, itemType, partner, sample }) {
       await utils.expenses.getConnectionsByType.cancel();
       const tasks = connections.data ?? [];
-      utils.expenses.getConnectionsByType.setData(
-        [
-          ...tasks,
-          {
-            id: `${Math.random()}`,
-            elemekName: item,
-            minta: sample,
-            partnerekName: partner,
-            tipus: itemType,
-          },
-        ],
-        { type: itemType }
-      );
+      utils.expenses.getConnectionsByType.setData({ type: itemType }, [
+        ...tasks,
+        {
+          id: `${Math.random()}`,
+          elemekId: itemId,
+          minta: sample,
+          partnerekName: partner,
+          tipus: itemType,
+        },
+      ]);
     },
   });
 
   const submitConnection = (e: any) => {
     e.preventDefault();
     createConnection.mutate({
-      item: selectedConnectionItem,
+      itemId: items.data?.find(
+        (item: any) => item.name === selectedConnectionItem
+      ).id,
       itemType: itemType,
       partner: selectedConnectionPartner,
       sample: selectedConnectionSample,
     });
-    const ws = new WebSocket("wss://dataupload.xyz/ws/make_cashflow_planner/");
     utils.expenses.getAllIncomeExpense;
     setSelectedConnectionItem("");
     setSelectedConnectionPartner("");
@@ -157,17 +155,14 @@ export default function Tabs({
     async onMutate({ name, type }) {
       await utils.expenses.getPartnersByType.cancel();
       const tasks = partners.data ?? [];
-      utils.expenses.getPartnersByType.setData(
-        [
-          ...tasks,
-          {
-            id: `${Math.random()}`,
-            name: name,
-            tipus: type,
-          },
-        ],
-        { type: itemType }
-      );
+      utils.expenses.getPartnersByType.setData({ type: itemType }, [
+        ...tasks,
+        {
+          id: `${Math.random()}`,
+          name: name,
+          tipus: type,
+        },
+      ]);
     },
   });
   const [selectedPartnerName, setSelectedPartnerName] = useState("");
@@ -184,16 +179,14 @@ export default function Tabs({
     async onMutate({ name, type }) {
       await utils.expenses.getTypeByType.cancel();
       const tasks = types.data ?? [];
-      utils.expenses.getTypeByType.setData(
-        [
-          ...tasks,
-          {
-            name: name,
-            tipus: type,
-          },
-        ],
-        { type: itemType }
-      );
+      utils.expenses.getTypeByType.setData({ type: itemType }, [
+        ...tasks,
+        {
+          id: `${Math.floor(Math.random())}`,
+          name: name,
+          tipus: type,
+        },
+      ]);
     },
   });
   const [selectedTypeName, setSelectedTypeName] = useState("");

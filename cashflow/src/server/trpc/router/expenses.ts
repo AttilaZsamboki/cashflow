@@ -74,6 +74,7 @@ export const expenseRouter = router({
   createItem: publicProcedure
     .input(
       z.object({
+        id: z.string(),
         category: z.string(),
         name: z.string(),
         partner: z.string(),
@@ -119,18 +120,18 @@ export const expenseRouter = router({
   createConnection: publicProcedure
     .input(
       z.object({
-        item: z.string(),
+        itemId: z.string(),
         sample: z.string(),
         itemType: z.string(),
         partner: z.string(),
       })
     )
-    .mutation(async ({ ctx, input: { item, partner, sample, itemType } }) => {
+    .mutation(async ({ ctx, input: { itemId, partner, sample, itemType } }) => {
       return await ctx.prisma.elem_kapcsolatok.create({
         data: {
           minta: sample,
           partnerekName: partner,
-          elemekName: item,
+          elemekId: itemId,
           tipus: itemType,
         },
       });
@@ -152,6 +153,212 @@ export const expenseRouter = router({
         data: {
           name: name,
           tipus: type,
+        },
+      });
+    }),
+  deleteItem: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input: { id } }) => {
+      return await ctx.prisma.elemek.delete({
+        where: {
+          id: id,
+        },
+      });
+    }),
+  deleteCategory: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input: { id } }) => {
+      return await ctx.prisma.kategoriak.delete({
+        where: {
+          id: id,
+        },
+      });
+    }),
+  deleteConnection: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input: { id } }) => {
+      return await ctx.prisma.elem_kapcsolatok.delete({
+        where: {
+          id: id,
+        },
+      });
+    }),
+  deleteType: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input: { id } }) => {
+      return await ctx.prisma.tipusok.delete({
+        where: {
+          id: id,
+        },
+      });
+    }),
+  deletePartner: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input: { id } }) => {
+      return await ctx.prisma.partnerek.delete({
+        where: {
+          id: id,
+        },
+      });
+    }),
+  // getCategoryDetails: publicProcedure
+  //   .input(z.object({ id: z.string() }))
+  //   .query(async ({ ctx, input: { id } }) => {
+  //     return await ctx.prisma.kategoriak.findUnique({
+  //       where: {
+  //         id: id,
+  //       },
+  //     });
+  //   }),
+  // getItemDetails: publicProcedure
+  //   .input(z.object({ id: z.string() }))
+  //   .query(async ({ ctx, input: { id } }) => {
+  //     return await ctx.prisma.elemek.findUnique({
+  //       where: {
+  //         id: id,
+  //       },
+  //     });
+  //   }),
+  // getTypeDetails: publicProcedure
+  //   .input(z.object({ id: z.string() }))
+  //   .query(async ({ ctx, input: { id } }) => {
+  //     return await ctx.prisma.tipusok.findUnique({
+  //       where: {
+  //         id: id,
+  //       },
+  //     });
+  //   }),
+  // getPartnerDetails: publicProcedure
+  //   .input(z.object({ id: z.string() }))
+  //   .query(async ({ ctx, input: { id } }) => {
+  //     return await ctx.prisma.partnerek.findUnique({
+  //       where: {
+  //         id: id,
+  //       },
+  //     });
+  //   }),
+  // getConnectionDetails: publicProcedure
+  //   .input(z.object({ id: z.string() }))
+  //   .query(async ({ ctx, input: { id } }) => {
+  //     return await ctx.prisma.elem_kapcsolatok.findUnique({
+  //       where: {
+  //         id: id,
+  //       },
+  //     });
+  //   }),
+  updateItem: publicProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        type: z.string(),
+        partnerName: z.string(),
+        kategoriakName: z.string(),
+        elem_tipus: z.string(),
+        id: z.string(),
+      })
+    )
+    .mutation(
+      async ({
+        ctx,
+        input: { id, name, type, partnerName, kategoriakName, elem_tipus },
+      }) => {
+        return ctx.prisma.elemek.update({
+          where: {
+            id: id,
+          },
+          data: {
+            name: name,
+            id: id,
+            type: type,
+            partnerName: partnerName,
+            kategoriakName: kategoriakName,
+            elem_tipus: elem_tipus,
+          },
+        });
+      }
+    ),
+  updateCategory: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        tipus: z.string(),
+        is_main: z.boolean(),
+        parent_name: z.string(),
+        is_active: z.boolean(),
+      })
+    )
+    .mutation(
+      ({
+        ctx,
+        input: { id, name, tipus, is_main, parent_name, is_active },
+      }) => {
+        return ctx.prisma.kategoriak.update({
+          where: {
+            id: id,
+          },
+          data: {
+            name: name,
+            tipus: tipus,
+            is_main: is_main,
+            parent_name: parent_name,
+            is_active: is_active,
+            id: id,
+          },
+        });
+      }
+    ),
+  updateConnection: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        minta: z.string(),
+        partnerekName: z.string(),
+        tipus: z.string(),
+        elemekId: z.string(),
+      })
+    )
+    .mutation(
+      ({ ctx, input: { id, minta, partnerekName, tipus, elemekId } }) => {
+        return ctx.prisma.elem_kapcsolatok.update({
+          where: {
+            id: id,
+          },
+          data: {
+            id: id,
+            minta: minta,
+            partnerekName: partnerekName,
+            tipus: tipus,
+            elemekId: elemekId,
+          },
+        });
+      }
+    ),
+  updatePartner: publicProcedure
+    .input(z.object({ id: z.string(), name: z.string(), tipus: z.string() }))
+    .mutation(({ ctx, input: { id, name, tipus } }) => {
+      return ctx.prisma.partnerek.update({
+        where: {
+          id: id,
+        },
+        data: {
+          name: name,
+          id: id,
+          tipus: tipus,
+        },
+      });
+    }),
+  updateType: publicProcedure
+    .input(z.object({ id: z.string(), name: z.string(), tipus: z.string() }))
+    .mutation(({ ctx, input: { id, name, tipus } }) => {
+      return ctx.prisma.tipusok.update({
+        where: {
+          id: id,
+        },
+        data: {
+          name: name,
+          id: id,
+          tipus: tipus,
         },
       });
     }),

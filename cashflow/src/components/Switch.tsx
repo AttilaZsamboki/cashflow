@@ -5,11 +5,12 @@ import React from "react";
 export default function SwitchButton({
   enabled,
   setEnabled,
+  activeSign = true,
 }: {
   enabled: boolean;
   setEnabled: React.Dispatch<boolean>;
+  activeSign?: boolean;
 }) {
-
   return (
     <div className="-mb-2">
       <Switch
@@ -24,13 +25,15 @@ export default function SwitchButton({
           className={`${enabled ? "translate-x-9" : "translate-x-0"}
             pointer-events-none inline-block h-[30px] w-[34px] transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out`}
         />
-        <div
-          className={`${
-            enabled ? "text-sky-900" : "text-gray-700"
-          } relative top-10 right-3 text-sm opacity-60`}
-        >
-          {enabled ? "aktív" : "inaktív"}
-        </div>
+        {activeSign && (
+          <div
+            className={`${
+              enabled ? "text-sky-900" : "text-gray-700"
+            } relative top-10 right-3 text-sm opacity-60`}
+          >
+            {enabled ? "aktív" : "inaktív"}
+          </div>
+        )}
       </Switch>
     </div>
   );

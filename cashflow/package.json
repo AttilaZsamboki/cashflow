@@ -30,6 +30,7 @@
     "@trpc/next": "^10.0.0-proxy-beta.25",
     "@trpc/react-query": "^10.0.0-proxy-beta.25",
     "@trpc/server": "^10.0.0-proxy-beta.25",
+    "axios": "^1.2.0",
     "chart.js": "^3.9.1",
     "dayjs": "^1.11.6",
     "next": "^12.3.1",

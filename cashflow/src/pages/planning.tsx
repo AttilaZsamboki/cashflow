@@ -1,8 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import Navbar from "../components/Navbar";
 import { DataGrid, GridValueFormatterParams, huHU } from "@mui/x-data-grid";
 import { trpc } from "../utils/trpc";
 import DatePicker from "../components/DatePicker";
+import axios from "axios";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { LoadingOverlay } from "@mantine/core";
+
 import {
   Table,
   TableBody,
@@ -38,7 +42,27 @@ const Planning: React.FC = () => {
   const [startingDate, setStartingDate] = React.useState<Date>();
   const [closingDate, setClosingDate] = React.useState<Date>();
   const plans = trpc.expenses.getCashflowPlanner.useQuery();
-  const mutation = trpc.expenses.updateCashflowPlanner.useMutation();
+  const utils = trpc.useContext();
+  const mutation = trpc.expenses.updateCashflowPlanner.useMutation({
+    async onMutate({ field, id, value }) {
+      await utils.expenses.getCashflowPlanner.cancel();
+      const allTasks = utils.expenses.getCashflowPlanner.getData();
+      if (!allTasks) {
+        return;
+      }
+      utils.expenses.getCashflowPlanner.setData(
+        undefined,
+        allTasks.map((t) =>
+          t.day === field && t.name === id
+            ? {
+                ...t,
+                ...{ day: field, name: id, planned_expense: value },
+              }
+            : t
+        )
+      );
+    },
+  });
   const expensePlanGrid: Array<any> = [];
   const incomePlanGrid: Array<any> = [];
   const investmentPlanGrid: Array<any> = [];
@@ -98,7 +122,7 @@ const Planning: React.FC = () => {
       ?.filter((items) => items.tipus === type)
       .forEach((plan) => {
         let category;
-        if (type === "kiadás") {
+        if (type === "költség") {
           category = expensePlanGrid.find((p) => p.Tétel === plan.name);
         } else if (type === "bevétel") {
           category = incomePlanGrid.find((p) => p.Tétel === plan.name);
@@ -110,7 +134,7 @@ const Planning: React.FC = () => {
         if (category) {
           category[plan.day] = plan.planned_expense;
         } else {
-          if (type === "kiadás") {
+          if (type === "költség") {
             expensePlanGrid.push({ Tétel: plan.name });
           } else if (type === "bevétel") {
             incomePlanGrid.push({ Tétel: plan.name });
@@ -125,7 +149,7 @@ const Planning: React.FC = () => {
         }
       });
   };
-  sorter("kiadás");
+  sorter("költség");
   sorter("bevétel");
   sorter("beruházás");
   sorter("finanszírozás");
@@ -286,10 +310,27 @@ const Planning: React.FC = () => {
       .map((e: any) => e.reduce((a: any, b: any) => a + b, 0))
       .reduce((a: any, b: any) => a + b, 0);
   const screenWidth = 1100;
+  const [refreshing, setRefreshing] = useState(false);
   return (
     <>
       <Navbar currentPage="Tervezés" />
+      <ArrowPathIcon
+        className="absolute left-7 z-10 mt-10 w-6 cursor-pointer text-white"
+        onClick={async () => {
+          setRefreshing(true);
+          const resp = await axios.post(
+            "https://www.dataupload.xyz/api/create-cashflow-planner/"
+          );
+          plans.refetch();
+          setTimeout(() => {
+            if (resp.data === "Good") {
+              setRefreshing(false);
+            }
+          }, 500);
+        }}
+      />
       <div className="grid grid-cols-12 grid-rows-2 gap-4">
+        <LoadingOverlay visible={refreshing} overlayBlur={2} />
         <div className="col-span-4">
           <div
             className="basic-card z-1 !mt-6 ml-3"
@@ -323,7 +364,7 @@ const Planning: React.FC = () => {
                         field: "Tétel",
                         headerName: "Bevételek",
                         headerClassName:
-                          "bg-green-600 text-white text-xl border-8 border-white",
+                          "bg-green-600 z-1 text-white text-xl border-8 border-white",
                         width: 200,
                         headerAlign: "center",
                       };
@@ -470,7 +511,7 @@ const Planning: React.FC = () => {
                     }
                     return {
                       field: "Tétel",
-                      headerName: "Kiadás",
+                      headerName: "Költség",
                       headerClassName:
                         "bg-red-700 text-white text-xl border-8 border-white",
                       width: 200,
