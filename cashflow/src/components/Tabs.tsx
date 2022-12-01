@@ -182,7 +182,7 @@ export default function Tabs({
       utils.expenses.getTypeByType.setData({ type: itemType }, [
         ...tasks,
         {
-          id: `${Math.floor(Math.random())}`,
+          id: `${Date.now()}`,
           name: name,
           tipus: type,
         },

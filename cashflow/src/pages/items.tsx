@@ -968,11 +968,10 @@ export default function Datas() {
         </div>
       </Dialog>
       <SideBar
-        current={"Tételek"}
+        current={"Adatok"}
         elements={[
+          { text: "Adatok", link: "items" },
           { text: "Pénztárcák", link: "vallets" },
-          { text: "Kategóriák", link: "categories" },
-          { text: "Tételek", link: "items" },
         ]}
       />
       <Radio

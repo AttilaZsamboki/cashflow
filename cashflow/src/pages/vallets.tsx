@@ -9,9 +9,8 @@ export default function Datas() {
       <SideBar
         current={"Pénztárcák"}
         elements={[
+          { text: "Adatok", link: "items" },
           { text: "Pénztárcák", link: "vallets" },
-          { text: "Kategóriák", link: "categories" },
-          { text: "Tételek", link: "items" },
         ]}
       />
     </div>
